@@ -1,330 +1,179 @@
 // client/src/App.js
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { toast, Toaster } from 'react-hot-toast';
-import { motion } from 'framer-motion';
-import { 
-  Zap, 
-  Eye,
-  EyeOff,
-  Mail,
-  Lock
-} from 'lucide-react';
-
-// Import AuthContext
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-
-// Import Dashboard component (placeholder for now)
-// import Dashboard from './components/dashboard/Dashboard';
-
-// Create React Query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+import React, { useState, useEffect } from 'react';
+import ModularDashboard from './components/dashboard/ModularDashboard';
 
 // Login Component
-const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
-  const [showPassword, setShowPassword] = useState(false);
+const Login = ({ onLogin }) => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    rememberMe: false
+  });
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    if (error) setError('');
+  };
+
+  const handleLogin = async () => {
     if (!formData.email || !formData.password) {
-      toast.error('Please fill in all fields');
+      setError('Please fill in all fields');
       return;
     }
 
     setIsLoading(true);
+    setError('');
+
     try {
-      await login(formData.email, formData.password);
-      toast.success('Welcome back to Prometheus! 🔥');
-    } catch (error) {
-      toast.error('Login failed. Please try again.');
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create user object with realistic data
+      const userData = {
+        email: formData.email,
+        name: 'Daniele Pauli',
+        title: 'IPF World Champion',
+        avatar: 'DP',
+        token: 'demo_token_' + Date.now()
+      };
+      
+      // Store in localStorage
+      localStorage.setItem('prometheus_user', JSON.stringify(userData));
+      
+      // Call onLogin with user data
+      onLogin(userData);
+      
+    } catch (err) {
+      setError('Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#000',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1rem'
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        style={{ width: '100%', maxWidth: '28rem', position: 'relative', zIndex: 10 }}
-      >
-        {/* Logo Section */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-            <div style={{
-              backgroundColor: '#f97316',
-              color: '#fff',
-              width: '3rem',
-              height: '3rem',
-              borderRadius: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.25rem',
-              fontWeight: 'bold',
-              marginRight: '0.75rem'
-            }}>
-              <Zap />
+    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      {/* Background particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-orange-500 rounded-full opacity-30 animate-pulse"></div>
+        <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-orange-500 rounded-full opacity-40 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-3/4 w-1.5 h-1.5 bg-orange-500 rounded-full opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-orange-500 text-white w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold mr-3">
+              ⚡
             </div>
-            <h1 style={{ color: '#fff', fontSize: '1.875rem', fontWeight: 'bold', margin: 0 }}>PROMETHEUS</h1>
+            <h1 className="text-3xl font-bold text-white">PROMETHEUS</h1>
           </div>
-          <p style={{ color: '#9ca3af', fontSize: '0.875rem', margin: 0 }}>AI-Powered Strength Training Community</p>
+          <p className="text-gray-400 text-sm">AI-Powered Strength Training Community</p>
         </div>
 
         {/* Login Form */}
-        <div style={{
-          backgroundColor: '#1f2937',
-          borderRadius: '0.75rem',
-          border: '1px solid #374151',
-          padding: '2rem'
-        }}>
-          <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem', textAlign: 'center' }}>
-            Welcome Back
-          </h2>
+        <div className="bg-gray-900 rounded-xl border border-gray-800 p-8 shadow-2xl">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">Welcome Back</h2>
+          
+          {error && (
+            <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-sm">
+              {error}
+            </div>
+          )}
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="space-y-6">
+            {/* Email */}
             <div>
-              <div style={{ position: 'relative' }}>
-                <Mail style={{ 
-                  position: 'absolute', 
-                  left: '0.75rem', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)', 
-                  width: '1.25rem', 
-                  height: '1.25rem', 
-                  color: '#9ca3af' 
-                }} />
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  style={{
-                    width: '100%',
-                    paddingLeft: '2.5rem',
-                    padding: '0.75rem 1rem',
-                    backgroundColor: '#1f2937',
-                    border: '1px solid #374151',
-                    borderRadius: '0.5rem',
-                    color: '#fff',
-                    fontSize: '1rem',
-                    outline: 'none'
-                  }}
-                  required
-                />
-              </div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+                placeholder="your@email.com"
+              />
             </div>
 
+            {/* Password */}
             <div>
-              <div style={{ position: 'relative' }}>
-                <Lock style={{ 
-                  position: 'absolute', 
-                  left: '0.75rem', 
-                  top: '50%', 
-                  transform: 'translateY(-50%)', 
-                  width: '1.25rem', 
-                  height: '1.25rem', 
-                  color: '#9ca3af' 
-                }} />
+              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+              <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  style={{
-                    width: '100%',
-                    paddingLeft: '2.5rem',
-                    paddingRight: '2.5rem',
-                    padding: '0.75rem 1rem',
-                    backgroundColor: '#1f2937',
-                    border: '1px solid #374151',
-                    borderRadius: '0.5rem',
-                    color: '#fff',
-                    fontSize: '1rem',
-                    outline: 'none'
-                  }}
-                  required
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+                  placeholder="Enter your password"
                 />
                 <button
                   type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: '#9ca3af',
-                    cursor: 'pointer'
-                  }}
                 >
-                  {showPassword ? <EyeOff /> : <Eye />}
+                  <span className="text-gray-400 hover:text-gray-300">
+                    {showPassword ? '🙈' : '👁️'}
+                  </span>
                 </button>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <label style={{ display: 'flex', alignItems: 'center' }}>
+            {/* Remember Me */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <input
+                  id="rememberMe"
+                  name="rememberMe"
                   type="checkbox"
                   checked={formData.rememberMe}
-                  onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                  style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-orange-500 bg-gray-800 border-gray-600 rounded focus:ring-orange-500"
                 />
-                <span style={{ fontSize: '0.875rem', color: '#d1d5db' }}>Remember me</span>
-              </label>
-              <button 
-                type="button" 
-                style={{ 
-                  fontSize: '0.875rem', 
-                  color: '#f97316', 
-                  background: 'none', 
-                  border: 'none', 
-                  cursor: 'pointer' 
-                }}
-              >
+                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-300">
+                  Remember me
+                </label>
+              </div>
+              <button className="text-sm text-orange-500 hover:text-orange-400 transition-colors">
                 Forgot password?
               </button>
             </div>
 
+            {/* Submit Button */}
             <button
-              type="submit"
+              onClick={handleLogin}
               disabled={isLoading}
-              style={{
-                width: '100%',
-                backgroundColor: isLoading ? '#c2410c' : '#f97316',
-                color: '#fff',
-                fontWeight: 'bold',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
+              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-700 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? (
+                <>
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </button>
-          </form>
+          </div>
 
-          <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem', color: '#9ca3af' }}>
+          <div className="mt-6 text-center text-sm text-gray-400">
             <strong>Demo:</strong> Use any email/password to access the community
           </div>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
-
-// Simple Dashboard Component (temporary)
-const Dashboard = () => {
-  const { user, logout } = useAuth();
-
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#000', color: '#fff' }}>
-      {/* Simple Header */}
-      <nav style={{ 
-        backgroundColor: '#1f2937', 
-        borderBottom: '1px solid #374151', 
-        padding: '1rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{
-            backgroundColor: '#f97316',
-            color: '#fff',
-            width: '2rem',
-            height: '2rem',
-            borderRadius: '0.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: '0.75rem'
-          }}>
-            <Zap />
-          </div>
-          <span style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Prometheus</span>
-          <span style={{ color: '#f97316', marginLeft: '0.5rem', fontSize: '0.875rem' }}>COMMUNITY</span>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ color: '#d1d5db', fontSize: '0.875rem' }}>Welcome, {user?.name}</span>
-          <button
-            onClick={logout}
-            style={{
-              backgroundColor: '#f97316',
-              color: '#fff',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.5rem',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
-      {/* Simple Content */}
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎉 Community Dashboard</h1>
-        <p style={{ color: '#9ca3af', fontSize: '1.125rem', marginBottom: '2rem' }}>
-          Welcome to the Prometheus Community! Your profile is ready.
-        </p>
-        
-        <div style={{
-          backgroundColor: '#1f2937',
-          border: '1px solid #374151',
-          borderRadius: '0.5rem',
-          padding: '2rem',
-          maxWidth: '600px',
-          margin: '0 auto'
-        }}>
-          <div style={{
-            width: '6rem',
-            height: '6rem',
-            backgroundColor: '#f97316',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '2rem',
-            fontWeight: 'bold',
-            margin: '0 auto 1rem auto'
-          }}>
-            {user?.avatar}
-          </div>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{user?.name}</h2>
-          <p style={{ color: '#f97316', fontSize: '1.125rem', marginBottom: '1rem' }}>{user?.title}</p>
-          <p style={{ color: '#9ca3af' }}>
-            🚀 Dashboard components are being built step by step!<br/>
-            Next: Feed, Profile, Navigation, and more...
-          </p>
         </div>
       </div>
     </div>
@@ -332,89 +181,56 @@ const Dashboard = () => {
 };
 
 // Main App Component
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
-}
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-// App Content Component
-function AppContent() {
-  const { user, loading } = useAuth();
+  useEffect(() => {
+    // Check for existing user data on app load
+    try {
+      const storedUser = localStorage.getItem('prometheus_user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.log('No stored user data found');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  if (loading) {
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('prometheus_user');
+    setUser(null);
+  };
+
+  if (isLoading) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        backgroundColor: '#000', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center' 
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '3rem',
-            height: '3rem',
-            backgroundColor: '#f97316',
-            borderRadius: '0.75rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem auto'
-          }}>
-            <Zap style={{ color: '#fff' }} />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-orange-500 text-white w-16 h-16 rounded-lg flex items-center justify-center text-2xl font-bold mb-4 mx-auto animate-pulse">
+            ⚡
           </div>
-          <p style={{ color: '#9ca3af' }}>Loading Prometheus...</p>
+          <div className="text-white text-xl font-bold">PROMETHEUS</div>
+          <div className="text-gray-400 mt-2">Loading Community...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#000' }}>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#111111',
-            color: '#ffffff',
-            border: '1px solid #333333',
-            borderRadius: '12px',
-          },
-          success: {
-            iconTheme: {
-              primary: '#f97316',
-              secondary: '#ffffff',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#ffffff',
-            },
-          },
-        }}
-      />
-      
-      <Routes>
-        <Route
-          path="/"
-          element={user ? <Dashboard /> : <Login />}
-        />
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
-      </Routes>
+    <div className="App">
+      {user ? (
+        <ModularDashboard user={user} onLogout={handleLogout} />
+      ) : (
+        <Login onLogin={handleLogin} />
+      )}
     </div>
   );
-}
+};
 
 export default App;
