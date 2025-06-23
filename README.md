@@ -10,13 +10,13 @@
 ## 🚀 **Live Demo**
 ```bash
 # Quick Start (unter 2 Minuten)
-git clone https://github.com/your-username/prometheus-community.git
-cd prometheus-community
+git clone https://github.com/DanielePL/Prometheus-Community.git
+cd prometheus-community-clean
 npm run setup:all
-npm run dev
+npm run dev:client
 ```
 
-**Demo Access:** `demo@prometheus.com` / `demo123`
+**Demo Access:** Login mit beliebiger Email/Passwort-Kombination
 
 ---
 
@@ -24,25 +24,32 @@ npm run dev
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| 🏠 **Community Feed** | ✅ Live | Share PRs, workouts & achievements |
-| 🤖 **AI Coach** | ✅ Live | Personalized VBT recommendations |
-| 📊 **VBT Analytics** | ✅ Live | Real-time velocity analysis |
-| 🏆 **Leaderboards** | ✅ Live | Weekly community rankings |
-| 💬 **Real-time Chat** | 🚧 Beta | Live community discussions |
-| 📅 **Events & Challenges** | ✅ Live | Monthly competitions |
-| 📱 **Mobile App** | 🔄 Coming | iOS & Android companion |
+| 🏠 **Community Feed** | 🚧 Entwicklung | Placeholder Dashboard implementiert |
+| 🔐 **Authentication** | ✅ Live | Login/Logout mit Context API |
+| 🎨 **Design System** | ✅ Live | Tailwind + Custom CSS Variables |
+| 📱 **Responsive UI** | ✅ Live | Mobile-first Design |
+| ⚡ **Modern Frontend** | ✅ Live | React 19 + Hooks + Router |
+| 🤖 **AI Coach** | 🔄 Geplant | VBT-basierte Empfehlungen |
+| 📊 **VBT Analytics** | 🔄 Geplant | Velocity-Based Training Analysis |
+| 🏆 **Leaderboards** | 🔄 Geplant | Community Rankings |
+| 💬 **Real-time Chat** | � Geplant | Live Diskussionen |
+| 📅 **Events & Challenges** | 🔄 Geplant | Community Competitions |
 
 ---
 
 ## 🛠️ **Tech Stack**
 
 ```
-Frontend  → React 18 + Tailwind CSS + Framer Motion
-Backend   → Node.js + Express + Socket.IO  
-Database  → PostgreSQL + Redis Cache
-Auth      → JWT + bcrypt + OAuth2
-AI/ML     → Python + TensorFlow (VBT Analysis)
-DevOps    → Docker + GitHub Actions + Vercel
+Frontend  → React 19 + Tailwind CSS + Framer Motion
+Auth      → Context API + localStorage (Demo)
+Styling   → Custom Design System + CSS Variables  
+Icons     → Lucide React
+Routing   → React Router v6
+State     → React Query + Context API
+Backend   → Node.js + Express (Geplant)
+Database  → PostgreSQL (Geplant) 
+AI/ML     → Python + TensorFlow (Geplant)
+DevOps    → Docker + GitHub Actions (Setup)
 ```
 
 ---
@@ -50,35 +57,29 @@ DevOps    → Docker + GitHub Actions + Vercel
 ## 📁 **Project Structure**
 
 ```
-prometheus-community/
+prometheus-community-clean/
 ├── 📦 client/                    # React Frontend (Port 3000)
-│   ├── public/
+│   ├── public/                  # Static Assets
 │   ├── src/
 │   │   ├── components/          # UI Components
-│   │   ├── pages/              # Route Pages  
-│   │   ├── hooks/              # Custom Hooks
-│   │   ├── services/           # API Services
-│   │   └── utils/              # Helper Functions
+│   │   │   ├── auth/           # Login Components
+│   │   │   ├── common/         # Shared Components  
+│   │   │   ├── dashboard/      # Dashboard Pages
+│   │   │   └── widgets/        # Reusable Widgets
+│   │   ├── contexts/           # React Contexts (Auth)
+│   │   ├── hooks/              # Custom Hooks (useAuth)
+│   │   ├── styles/             # CSS & Design System
+│   │   └── App.js              # Main App Component
+│   ├── tailwind.config.js      # Tailwind Configuration
 │   └── package.json
-├── 🚀 server/                    # Node.js Backend (Port 5000)
-│   ├── src/
-│   │   ├── controllers/        # Route Controllers
-│   │   ├── middleware/         # Auth & Validation
-│   │   ├── models/            # Database Models
-│   │   ├── routes/            # API Routes
-│   │   └── services/          # Business Logic
+├── � server/                    # Node.js Backend (Placeholder)
 │   └── package.json
-├── 🗄️ database/                  # Database Scripts
-│   ├── migrations/            # Schema Changes
-│   ├── seeds/                 # Test Data
-│   └── schema.sql            # Initial Schema
-├── 🤖 ai-engine/                 # Python VBT Analysis
-│   ├── models/               # ML Models
-│   ├── api/                  # FastAPI Server
-│   └── requirements.txt
+├── 🗄️ database/                  # Database Scripts (Placeholder)
+│   ├── migrations/            
+│   └── seeds/                 
 ├── 📚 docs/                      # Documentation
 ├── 🐳 docker-compose.yml         # Development Environment
-├── 🔧 package.json              # Root Scripts
+├── 🔧 package.json              # Root Scripts & Workspaces
 └── 📋 README.md                 # This File
 ```
 
@@ -95,75 +96,51 @@ docker --version  # v20+ recommended
 
 ### 1️⃣ **Clone & Setup**
 ```bash
-git clone https://github.com/your-username/prometheus-community.git
-cd prometheus-community
+git clone https://github.com/DanielePL/Prometheus-Community.git
+cd prometheus-community-clean
 npm run setup:all    # Installs all dependencies
 ```
 
-### 2️⃣ **Environment Setup**
+### 2️⃣ **Start Development**
 ```bash
-cp server/.env.example server/.env
-cp ai-engine/.env.example ai-engine/.env
-# Edit .env files with your credentials
+# Frontend Development
+npm run dev:client    # Starts React app on http://localhost:3000
+
+# Or use root command
+cd client && npm start
 ```
 
-### 3️⃣ **Database Setup**
+### 3️⃣ **Login & Testing**
 ```bash
-# With Docker (Recommended)
-docker-compose up -d postgres redis
-
-# Or Manual Setup
-createdb prometheus_community
-npm run db:migrate
-npm run db:seed
-```
-
-### 4️⃣ **Start Development**
-```bash
-# All services in one command
-npm run dev
-
-# Or individual services
-npm run dev:client    # Frontend only
-npm run dev:server    # Backend only  
-npm run dev:ai        # AI Engine only
+# Open browser to http://localhost:3000
+# Login with any email/password combination
+# Explore the dashboard interface
 ```
 
 ---
 
 ## 🌐 **API Documentation**
 
-### Authentication
-```http
-POST /api/auth/login
-POST /api/auth/register
-POST /api/auth/refresh
+### Frontend-Only (Current State)
+```javascript
+// Authentication (Demo Mode)
+const { user, login, logout } = useAuth();
+
+// Login with any credentials
+await login('test@example.com', 'password');
+
+// Access user data
+console.log(user.name); // "Daniele Pauli"
 ```
 
-### User Management
+### Planned Backend APIs
 ```http
-GET    /api/users/profile
-PUT    /api/users/profile
-GET    /api/users/stats
+POST /api/auth/login      # (Coming Soon)
+POST /api/auth/register   # (Coming Soon)
+GET  /api/users/profile   # (Coming Soon)
+POST /api/workouts        # (Coming Soon)
+GET  /api/feed            # (Coming Soon)
 ```
-
-### Workouts & VBT
-```http
-POST   /api/workouts
-GET    /api/workouts/history
-POST   /api/vbt/analyze
-GET    /api/vbt/recommendations
-```
-
-### Community
-```http
-GET    /api/feed
-POST   /api/posts
-GET    /api/leaderboard
-GET    /api/challenges
-```
-
-**📖 Full API Docs:** [docs/API.md](./docs/API.md)
 
 ---
 
@@ -171,11 +148,14 @@ GET    /api/challenges
 
 ### Color Palette
 ```css
---prometheus-orange: #ff6600     /* Primary Brand */
---prometheus-orange-dark: #e55a00  /* Hover States */
---prometheus-dark: #0a0a0a        /* Background */
---prometheus-card: #111111        /* Cards */
---prometheus-border: #333333      /* Borders */
+--prometheus-orange: #f97316     /* Primary Brand */
+--prometheus-orange-dark: #ea580c  /* Hover States */
+--prometheus-orange-light: #fb923c /* Light Accent */
+--prometheus-dark: #000000        /* Background */
+--prometheus-dark-card: #111111   /* Cards */
+--prometheus-gray-dark: #1f2937   /* Borders */
+--prometheus-text-white: #ffffff  /* Primary Text */
+--prometheus-text-muted: #9ca3af  /* Secondary Text */
 ```
 
 ### Typography
@@ -192,38 +172,41 @@ font-weights: 400, 500, 600, 700, 800
 
 ```bash
 # Frontend Tests
+cd client && npm test
+
+# Component Testing (Available)
 npm run test:client
 
-# Backend Tests  
-npm run test:server
-
-# E2E Tests
+# E2E Tests (Planned)
 npm run test:e2e
 
-# Coverage Report
+# Coverage Report (Planned)
 npm run test:coverage
 ```
+
+**Current Test Status:** Basic React testing setup available
 
 ---
 
 ## 🚀 **Deployment**
 
-### Production Build
+### Current Status: Development Phase
 ```bash
-npm run build           # Build all services
-npm run deploy:staging  # Deploy to staging
-npm run deploy:prod     # Deploy to production
-```
+# Local Development
+npm run dev:client    # Frontend on localhost:3000
 
-### Docker Production
-```bash
-docker-compose -f docker-compose.prod.yml up -d
+# Production Build (Frontend)
+cd client && npm run build
+
+# Future Deployment (Planned)
+npm run deploy:staging  
+npm run deploy:prod     
 ```
 
 ### Environment URLs
 - **Development:** http://localhost:3000
-- **Staging:** https://staging.prometheuscommunity.com  
-- **Production:** https://prometheuscommunity.com
+- **Staging:** Coming Soon
+- **Production:** Coming Soon
 
 ---
 
@@ -241,12 +224,15 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ## 📊 **Performance**
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| First Contentful Paint | < 1.2s | ✅ 0.8s |
-| Time to Interactive | < 2.5s | ✅ 1.9s |
-| Lighthouse Score | > 90 | ✅ 96/100 |
-| Bundle Size | < 250kb | ✅ 180kb |
+| Metric | Target | Current Status |
+|--------|--------|----------------|
+| First Contentful Paint | < 1.2s | ✅ Optimized |
+| Time to Interactive | < 2.5s | ✅ Fast Loading |
+| Bundle Size | < 250kb | ✅ Lightweight |
+| Lighthouse Score | > 90 | 🔄 Testing Needed |
+| Mobile Responsive | 100% | ✅ Mobile-First |
+
+**Note:** Performance metrics will be measured after backend integration
 
 ---
 
@@ -268,21 +254,21 @@ This project is licensed under the **MIT License** - see [LICENSE](./LICENSE) fi
 
 ## 🔗 **Links**
 
-- 🌐 **Website:** [prometheuscommunity.com](https://prometheuscommunity.com)
-- 📱 **App Store:** Coming Soon
-- 🐦 **Twitter:** [@PrometheusAI](https://twitter.com/PrometheusAI)
-- 💬 **Discord:** [Join Community](https://discord.gg/prometheus)
-- 📧 **Email:** hello@prometheuscommunity.com
+- 🌐 **Repository:** [github.com/DanielePL/Prometheus-Community](https://github.com/DanielePL/Prometheus-Community)
+- � **Project Board:** Coming Soon
+- � **Contact:** [Your Email]
+- 💬 **Discord:** Planned
+- � **Social Media:** Planned
 
 ---
 
 <div align="center">
 
-**Made with ⚡ by the Prometheus Team**
+**Made with ⚡ by Daniele Pauli**
 
-*Empowering athletes through AI-driven strength training*
+*Building the future of AI-powered strength training*
 
-[![Stars](https://img.shields.io/github/stars/danielepauli/prometheus-community?style=social)](https://github.com/danielepauli/prometheus-community)
-[![Forks](https://img.shields.io/github/forks/danielepauli/prometheus-community?style=social)](https://github.com/danielepauli/prometheus-community)
+[![Stars](https://img.shields.io/github/stars/DanielePL/Prometheus-Community?style=social)](https://github.com/DanielePL/Prometheus-Community)
+[![Forks](https://img.shields.io/github/forks/DanielePL/Prometheus-Community?style=social)](https://github.com/DanielePL/Prometheus-Community)
 
 </div>
