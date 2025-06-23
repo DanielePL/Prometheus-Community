@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: prometheus-postgres
+    environment:
+      POSTGRES_DB: prometheus_community
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: prometheus123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - prometheus-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: prometheus-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - prometheus-network
+
+  # Backend API
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: prometheus-server
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: prometheus_community
+      DB_USER: postgres
+      DB_PASSWORD: prometheus123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - prometheus-network
+
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: prometheus-client
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:5000
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - prometheus-network
+
+  # AI Engine (Python)
+  ai-engine:
+    build:
+      context: ./ai-engine
+      dockerfile: Dockerfile
+    container_name: prometheus-ai
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    volumes:
+      - ./ai-engine:/app
+    networks:
+      - prometheus-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  prometheus-network:
+    driver: bridge

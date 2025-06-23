@@ -1,0 +1,416 @@
+/* client/src/styles/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   PROMETHEUS DESIGN SYSTEM - CSS VARIABLES & CUSTOM CLASSES
+   ========================================================================== */
+
+:root {
+  /* Color Palette */
+  --prometheus-orange: #f97316;
+  --prometheus-orange-dark: #ea580c;
+  --prometheus-orange-light: #fb923c;
+  
+  --prometheus-dark: #000000;
+  --prometheus-dark-card: #111111;
+  --prometheus-dark-lighter: #1a1a1a;
+  
+  --prometheus-gray-dark: #1f2937;
+  --prometheus-gray-medium: #374151;
+  --prometheus-gray-light: #4b5563;
+  
+  --prometheus-text-white: #ffffff;
+  --prometheus-text-light: #f3f4f6;
+  --prometheus-text-muted: #9ca3af;
+  
+  /* Spacing */
+  --prometheus-border-radius: 0.75rem;
+  --prometheus-border-radius-sm: 0.5rem;
+  
+  /* Shadows */
+  --prometheus-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --prometheus-shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  
+  /* Animations */
+  --prometheus-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --prometheus-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   BASE STYLES
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--prometheus-dark);
+  color: var(--prometheus-text-white);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--prometheus-gray-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--prometheus-gray-medium);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--prometheus-orange);
+}
+
+/* ==========================================================================
+   PROMETHEUS COLOR UTILITIES
+   ========================================================================== */
+
+.bg-prometheus-dark { background-color: var(--prometheus-dark); }
+.bg-prometheus-dark-card { background-color: var(--prometheus-dark-card); }
+.bg-prometheus-dark-lighter { background-color: var(--prometheus-dark-lighter); }
+.bg-prometheus-orange { background-color: var(--prometheus-orange); }
+.bg-prometheus-orange-dark { background-color: var(--prometheus-orange-dark); }
+.bg-prometheus-orange-light { background-color: var(--prometheus-orange-light); }
+.bg-prometheus-gray-dark { background-color: var(--prometheus-gray-dark); }
+.bg-prometheus-gray-medium { background-color: var(--prometheus-gray-medium); }
+.bg-prometheus-gray-light { background-color: var(--prometheus-gray-light); }
+
+.text-prometheus-orange { color: var(--prometheus-orange); }
+.text-prometheus-orange-dark { color: var(--prometheus-orange-dark); }
+.text-prometheus-orange-light { color: var(--prometheus-orange-light); }
+.text-prometheus-text-white { color: var(--prometheus-text-white); }
+.text-prometheus-text-light { color: var(--prometheus-text-light); }
+.text-prometheus-text-muted { color: var(--prometheus-text-muted); }
+
+.border-prometheus-orange { border-color: var(--prometheus-orange); }
+.border-prometheus-gray-medium { border-color: var(--prometheus-gray-medium); }
+.border-prometheus-gray-light { border-color: var(--prometheus-gray-light); }
+
+/* ==========================================================================
+   BUTTON COMPONENTS
+   ========================================================================== */
+
+.btn-primary {
+  @apply px-6 py-3 bg-prometheus-orange text-white font-semibold rounded-lg transition-all duration-200 hover:bg-prometheus-orange-dark hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-prometheus-orange focus:ring-opacity-50;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+}
+
+.btn-secondary {
+  @apply px-6 py-3 bg-prometheus-gray-medium text-prometheus-text-light font-semibold rounded-lg transition-all duration-200 hover:bg-prometheus-gray-light hover:text-white hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-prometheus-gray-light focus:ring-opacity-50;
+}
+
+/* ==========================================================================
+   CARD COMPONENTS
+   ========================================================================== */
+
+.card {
+  @apply bg-prometheus-dark-card border border-prometheus-gray-medium rounded-lg shadow-lg;
+  box-shadow: var(--prometheus-shadow);
+  transition: var(--prometheus-transition);
+}
+
+.card:hover {
+  box-shadow: var(--prometheus-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.widget {
+  @apply card;
+}
+
+.feed-post {
+  @apply card hover:border-prometheus-orange hover:border-opacity-50;
+  transition: var(--prometheus-transition);
+}
+
+.feed-post:hover {
+  box-shadow: 0 20px 40px rgba(249, 115, 22, 0.1);
+}
+
+/* ==========================================================================
+   NAVIGATION COMPONENTS
+   ========================================================================== */
+
+.nav-link {
+  @apply flex items-center space-x-2 px-4 py-2 text-prometheus-text-light hover:text-white hover:bg-prometheus-gray-medium rounded-lg font-medium transition-all duration-200;
+}
+
+.nav-link.active {
+  @apply text-prometheus-orange bg-prometheus-orange bg-opacity-10;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   FORM COMPONENTS
+   ========================================================================== */
+
+.input-field {
+  @apply px-4 py-3 bg-prometheus-gray-dark border border-prometheus-gray-medium rounded-lg text-white placeholder-prometheus-text-muted transition-all duration-200 focus:outline-none focus:border-prometheus-orange focus:ring-2 focus:ring-prometheus-orange focus:ring-opacity-50;
+}
+
+.input-field:focus {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* ==========================================================================
+   AVATAR COMPONENT
+   ========================================================================== */
+
+.avatar {
+  @apply bg-prometheus-orange rounded-full flex items-center justify-center font-bold text-white transition-transform duration-200;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+}
+
+/* ==========================================================================
+   BADGE COMPONENT
+   ========================================================================== */
+
+.badge {
+  @apply inline-flex items-center px-3 py-1 text-xs font-medium text-prometheus-orange bg-prometheus-orange bg-opacity-10 rounded-full border border-prometheus-orange border-opacity-20;
+}
+
+/* ==========================================================================
+   SPECIAL EFFECTS
+   ========================================================================== */
+
+.glow-orange {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.5), 0 0 40px rgba(249, 115, 22, 0.3);
+}
+
+.glass-effect {
+  backdrop-filter: blur(12px);
+  background: rgba(17, 17, 17, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pulse-dot {
+  animation: pulse-orange 2s infinite;
+}
+
+@keyframes pulse-orange {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+/* ==========================================================================
+   LOADING SPINNER
+   ========================================================================== */
+
+.spinner {
+  @apply inline-block w-4 h-4 border-2 border-white border-opacity-30 border-t-white rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   UTILITY ANIMATIONS
+   ========================================================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+  .nav-link {
+    @apply justify-center py-3;
+  }
+  
+  .card {
+    @apply mx-2;
+  }
+  
+  .widget {
+    @apply mx-2;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .card {
+    @apply mx-4;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .nav-link:hover {
+    transform: translateY(-1px);
+  }
+  
+  .card:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* ==========================================================================
+   DARK MODE OPTIMIZATIONS
+   ========================================================================== */
+
+/* Enhanced contrast for better readability */
+.high-contrast {
+  --prometheus-text-muted: #d1d5db;
+  --prometheus-gray-medium: #4b5563;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY
+   ========================================================================== */
+
+/* Focus indicators */
+.focus-visible:focus {
+  @apply outline-none ring-2 ring-prometheus-orange ring-opacity-50;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .pulse-dot {
+    animation: none;
+  }
+  
+  .spinner {
+    animation: none;
+    border: 2px solid var(--prometheus-orange);
+  }
+}
+
+/* ==========================================================================
+   PRINT STYLES
+   ========================================================================== */
+
+@media print {
+  .card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+  
+  .glow-orange {
+    box-shadow: none;
+  }
+  
+  .glass-effect {
+    backdrop-filter: none;
+    background: white;
+  }
+}
+
+/* ==========================================================================
+   CUSTOM UTILITIES
+   ========================================================================== */
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--prometheus-orange), var(--prometheus-orange-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.border-gradient {
+  border: 2px solid;
+  border-image: linear-gradient(135deg, var(--prometheus-orange), var(--prometheus-orange-light)) 1;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

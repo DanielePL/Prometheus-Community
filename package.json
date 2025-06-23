@@ -1,0 +1,77 @@
+{
+  "name": "prometheus-community",
+  "version": "1.0.0",
+  "description": "AI-Powered Strength Training Community Platform",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "ai-engine"
+  ],
+  "scripts": {
+    "setup:all": "npm install && npm run setup:client && npm run setup:server && npm run setup:ai",
+    "setup:client": "cd client && npm install",
+    "setup:server": "cd server && npm install", 
+    "setup:ai": "cd ai-engine && pip install -r requirements.txt",
+    
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\" \"npm run dev:ai\"",
+    "dev:client": "cd client && npm start",
+    "dev:server": "cd server && npm run dev",
+    "dev:ai": "cd ai-engine && python main.py",
+    
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    
+    "test": "npm run test:client && npm run test:server",
+    "test:client": "cd client && npm test",
+    "test:server": "cd server && npm test",
+    "test:e2e": "cypress run",
+    "test:coverage": "npm run test:client -- --coverage && npm run test:server -- --coverage",
+    
+    "db:migrate": "cd server && npm run migrate",
+    "db:seed": "cd server && npm run seed",
+    "db:reset": "cd server && npm run migrate:rollback && npm run migrate && npm run seed",
+    
+    "lint": "npm run lint:client && npm run lint:server",
+    "lint:client": "cd client && eslint src/",
+    "lint:server": "cd server && eslint src/",
+    "lint:fix": "npm run lint:client -- --fix && npm run lint:server -- --fix",
+    
+    "deploy:staging": "vercel --prod=false",
+    "deploy:prod": "vercel --prod",
+    
+    "docker:dev": "docker-compose up -d",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "docker:stop": "docker-compose down",
+    
+    "clean": "rm -rf node_modules client/node_modules server/node_modules client/build server/dist",
+    "reset": "npm run clean && npm run setup:all"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "cypress": "^12.7.0",
+    "eslint": "^8.36.0",
+    "prettier": "^2.8.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "author": "Prometheus Team <hello@prometheuscommunity.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielepauli/prometheus-community.git"
+  },
+  "keywords": [
+    "fitness",
+    "strength-training", 
+    "velocity-based-training",
+    "vbt",
+    "ai",
+    "community",
+    "react",
+    "nodejs"
+  ]
+}
