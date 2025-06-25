@@ -112,7 +112,8 @@ const ChallengesSimple = ({ user }) => {
       </div>
 
       {/* Challenges Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="bg-gray-800 rounded-xl p-6 min-h-[600px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredChallenges.map(challenge => (
           <div key={challenge.id} className="bg-gray-800 rounded-xl p-6">
             <div className="flex items-start justify-between mb-4">
@@ -161,6 +162,7 @@ const ChallengesSimple = ({ user }) => {
             </button>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

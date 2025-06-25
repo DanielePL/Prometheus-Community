@@ -243,12 +243,28 @@ const SettingsSimple = ({ user, settings, updateSettings }) => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="bg-gray-800 rounded-xl overflow-hidden">
-        <div className="flex">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      {/* Settings Header */}
+      <div className="bg-gray-800 rounded-xl p-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-white">Settings</h1>
+          <div className="flex space-x-2">
+            <button className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg text-sm">
+              💾 Save All
+            </button>
+            <button className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg text-sm">
+              🔄 Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Settings Container */}
+      <div className="bg-gray-800 rounded-xl overflow-hidden min-h-[700px]">
+        <div className="flex h-full">
           {/* Sidebar */}
-          <div className="w-64 bg-gray-900 p-6">
-            <h2 className="text-xl font-semibold text-white mb-6">Settings</h2>
+          <div className="w-64 bg-gray-900 p-6 h-full">
+            <h3 className="text-lg font-medium text-white mb-6">Categories</h3>
             <nav className="space-y-2">
               {sections.map(section => (
                 <button
@@ -268,11 +284,11 @@ const SettingsSimple = ({ user, settings, updateSettings }) => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-8">
+          <div className="flex-1 p-8 h-full">
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-white">
+              <h2 className="text-xl font-semibold text-white">
                 {sections.find(s => s.id === activeSection)?.label}
-              </h1>
+              </h2>
             </div>
             
             {renderContent()}

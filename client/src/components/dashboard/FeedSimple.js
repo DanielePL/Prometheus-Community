@@ -112,7 +112,7 @@ const FeedSimple = ({ user, handleUserClick }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Stories Section */}
       {showStories && (
         <div className="bg-gray-800 rounded-xl p-4">
@@ -151,7 +151,7 @@ const FeedSimple = ({ user, handleUserClick }) => {
       {/* Quick Stats */}
       <div className="bg-gray-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-white">Feed</h1>
+          <h1 className="text-3xl font-bold text-white">Feed</h1>
           <div className="flex space-x-2">
             <button className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg text-sm">
               🔥 Trending
@@ -213,7 +213,10 @@ const FeedSimple = ({ user, handleUserClick }) => {
         </div>
       </div>
 
-      {/* Enhanced Posts */}
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Posts Column */}
+        <div className="lg:col-span-2 space-y-6 bg-gray-800 rounded-xl p-6 min-h-[600px]">
       {posts.map(post => {
         const typeInfo = getPostTypeInfo(post.type, post.isLive);
         const isLiked = likedPosts.has(post.id);
@@ -221,7 +224,7 @@ const FeedSimple = ({ user, handleUserClick }) => {
         const showPostComments = showComments[post.id];
         
         return (
-          <div key={post.id} className="bg-gray-800 rounded-xl overflow-hidden">
+          <div key={post.id} className="bg-gray-700 rounded-xl overflow-hidden">
             {/* Post Header */}
             <div className="p-6 pb-4">
               <div className="flex items-center justify-between mb-4">
@@ -394,68 +397,73 @@ const FeedSimple = ({ user, handleUserClick }) => {
           </div>
         );
       })}
-
-      {/* Trending Section */}
-      <div className="bg-gray-800 rounded-xl p-6">
-        <h3 className="text-white font-semibold mb-4 flex items-center">
-          <span className="mr-2">🔥</span>
-          Trending in Community
-        </h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-            <div>
-              <span className="text-orange-400 font-medium">#deadliftchallenge</span>
-              <p className="text-gray-400 text-sm">1,247 posts this week</p>
-            </div>
-            <span className="text-2xl">🏋️‍♂️</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-            <div>
-              <span className="text-orange-400 font-medium">#transformationtuesday</span>
-              <p className="text-gray-400 text-sm">892 posts today</p>
-            </div>
-            <span className="text-2xl">📸</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
-            <div>
-              <span className="text-orange-400 font-medium">#motivationmonday</span>
-              <p className="text-gray-400 text-sm">543 posts today</p>
-            </div>
-            <span className="text-2xl">💪</span>
-          </div>
         </div>
-      </div>
 
-      {/* Suggested Follows */}
-      <div className="bg-gray-800 rounded-xl p-6">
-        <h3 className="text-white font-semibold mb-4 flex items-center">
-          <span className="mr-2">👥</span>
-          Suggested for You
-        </h3>
-        <div className="space-y-3">
-          {[
-            { name: 'Pro Lifter Jake', avatar: 'PJ', followers: '12.5K', verified: true },
-            { name: 'Fitness Coach Anna', avatar: 'FA', followers: '8.2K', verified: true },
-            { name: 'Strength Community', avatar: 'SC', followers: '25.1K', verified: false }
-          ].map((suggestion, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {suggestion.avatar}
-                </div>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Trending Section */}
+          <div className="bg-gray-800 rounded-xl p-6">
+            <h3 className="text-white font-semibold mb-4 flex items-center">
+              <span className="mr-2">🔥</span>
+              Trending in Community
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                 <div>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-white font-medium">{suggestion.name}</span>
-                    {suggestion.verified && <span className="text-orange-500">✓</span>}
-                  </div>
-                  <span className="text-gray-400 text-sm">{suggestion.followers} followers</span>
+                  <span className="text-orange-400 font-medium">#deadliftchallenge</span>
+                  <p className="text-gray-400 text-sm">1,247 posts this week</p>
                 </div>
+                <span className="text-2xl">🏋️‍♂️</span>
               </div>
-              <button className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg text-sm font-medium">
-                Follow
-              </button>
+              <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                <div>
+                  <span className="text-orange-400 font-medium">#transformationtuesday</span>
+                  <p className="text-gray-400 text-sm">892 posts today</p>
+                </div>
+                <span className="text-2xl">📸</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                <div>
+                  <span className="text-orange-400 font-medium">#motivationmonday</span>
+                  <p className="text-gray-400 text-sm">543 posts today</p>
+                </div>
+                <span className="text-2xl">💪</span>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Suggested Follows */}
+          <div className="bg-gray-800 rounded-xl p-6">
+            <h3 className="text-white font-semibold mb-4 flex items-center">
+              <span className="mr-2">👥</span>
+              Suggested for You
+            </h3>
+            <div className="space-y-3">
+              {[
+                { name: 'Pro Lifter Jake', avatar: 'PJ', followers: '12.5K', verified: true },
+                { name: 'Fitness Coach Anna', avatar: 'FA', followers: '8.2K', verified: true },
+                { name: 'Strength Community', avatar: 'SC', followers: '25.1K', verified: false }
+              ].map((suggestion, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                      {suggestion.avatar}
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-white font-medium">{suggestion.name}</span>
+                        {suggestion.verified && <span className="text-orange-500">✓</span>}
+                      </div>
+                      <span className="text-gray-400 text-sm">{suggestion.followers} followers</span>
+                    </div>
+                  </div>
+                  <button className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg text-sm font-medium">
+                    Follow
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

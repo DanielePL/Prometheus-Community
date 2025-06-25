@@ -109,11 +109,28 @@ const MessagesSimple = ({ user }) => {
   };
 
   return (
-    <div className="h-screen flex bg-gray-900">
-      {/* Chat List Sidebar */}
-      <div className="w-80 bg-gray-800 border-r border-gray-700">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      {/* Messages Header */}
+      <div className="bg-gray-800 rounded-xl p-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-white">Messages</h1>
+          <div className="flex space-x-2">
+            <button className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg text-sm">
+              💬 New Chat
+            </button>
+            <button className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg text-sm">
+              👥 Groups
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Chat Container */}
+      <div className="bg-gray-800 rounded-xl overflow-hidden h-[700px] flex">
+        {/* Chat List Sidebar */}
+        <div className="w-80 bg-gray-800 border-r border-gray-700">
         <div className="p-4 border-b border-gray-700">
-          <h2 className="text-xl font-semibold text-white">Messages</h2>
+          <h3 className="text-lg font-medium text-white">Conversations</h3>
           <div className="mt-3 relative">
             <input
               type="text"
@@ -267,6 +284,7 @@ const MessagesSimple = ({ user }) => {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

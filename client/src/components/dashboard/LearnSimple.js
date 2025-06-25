@@ -130,7 +130,8 @@ const LearnSimple = ({ user }) => {
       </div>
 
       {/* Courses Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-gray-800 rounded-xl p-6 min-h-[600px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredCourses.map(course => (
           <div key={course.id} className="bg-gray-800 rounded-xl overflow-hidden">
             <div className="p-6">
@@ -195,6 +196,7 @@ const LearnSimple = ({ user }) => {
             </div>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

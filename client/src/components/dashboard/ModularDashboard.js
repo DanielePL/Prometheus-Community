@@ -8,9 +8,10 @@ import LeaderboardSimple from './LeaderboardSimple';
 import EventsSimple from './EventsSimple';
 import MessagesSimple from './MessagesSimple';
 import SettingsSimple from './SettingsSimple';
+import CampusSimple from './CampusSimple';
 
 const ModularDashboard = ({ user, onLogout }) => {
-  const [activeSection, setActiveSection] = useState('feed');
+  const [activeSection, setActiveSection] = useState('campus'); // Start with Campus as default
   const [settings, setSettings] = useState({
     notifications: {
       email: true,
@@ -59,6 +60,8 @@ const ModularDashboard = ({ user, onLogout }) => {
   // Render the appropriate component based on active section
   const renderContent = () => {
     switch (activeSection) {
+      case 'campus':
+        return <CampusSimple user={mockUser} />;
       case 'feed':
         return <FeedSimple user={mockUser} handleUserClick={handleUserClick} />;
       case 'profile':
@@ -76,7 +79,7 @@ const ModularDashboard = ({ user, onLogout }) => {
       case 'settings':
         return <SettingsSimple user={mockUser} settings={settings} updateSettings={updateSettings} />;
       default:
-        return <FeedSimple user={mockUser} handleUserClick={handleUserClick} />;
+        return <CampusSimple user={mockUser} />; // Default to Campus
     }
   };
 
@@ -95,6 +98,16 @@ const ModularDashboard = ({ user, onLogout }) => {
             </div>
             
             <nav className="flex items-center space-x-6">
+              <button 
+                onClick={() => setActiveSection('campus')}
+                className={`flex items-center px-3 py-1 rounded-lg ${
+                  activeSection === 'campus' 
+                    ? 'text-orange-500 bg-orange-500/10' 
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                <span className="mr-2">🏛️</span>Campus
+              </button>
               <button 
                 onClick={() => setActiveSection('feed')}
                 className={`flex items-center px-3 py-1 rounded-lg ${
@@ -175,6 +188,16 @@ const ModularDashboard = ({ user, onLogout }) => {
           </div>
 
           <nav className="space-y-2">
+            <button 
+              onClick={() => setActiveSection('campus')}
+              className={`w-full flex items-center px-4 py-3 rounded-lg ${
+                activeSection === 'campus' 
+                  ? 'text-white bg-orange-500' 
+                  : 'text-gray-300 hover:text-white hover:bg-gray-800'
+              }`}
+            >
+              <span className="mr-3">🏛️</span>Prometheus Campus
+            </button>
             <button 
               onClick={() => setActiveSection('feed')}
               className={`w-full flex items-center px-4 py-3 rounded-lg ${

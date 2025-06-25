@@ -36,7 +36,7 @@ const LeaderboardSimple = ({ user }) => {
   const currentData = leaderboards[activeLeaderboard];
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="bg-gray-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
@@ -134,7 +134,7 @@ const LeaderboardSimple = ({ user }) => {
       </div>
 
       {/* Full Leaderboard */}
-      <div className="bg-gray-800 rounded-xl">
+      <div className="bg-gray-800 rounded-xl min-h-[400px]">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-semibold text-white">Rankings</h2>
         </div>

@@ -81,7 +81,7 @@ const EventsSimple = ({ user }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="bg-gray-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
@@ -130,7 +130,8 @@ const EventsSimple = ({ user }) => {
       </div>
 
       {/* Events List */}
-      <div className="space-y-4">
+      <div className="bg-gray-800 rounded-xl p-6 min-h-[600px]">
+        <div className="space-y-4">
         {events[activeView].map(event => {
           const typeInfo = getEventTypeInfo(event.type);
           
@@ -229,6 +230,7 @@ const EventsSimple = ({ user }) => {
           </p>
         </div>
       )}
+      </div>
     </div>
   );
 };

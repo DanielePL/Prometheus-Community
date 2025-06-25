@@ -30,7 +30,7 @@ import {
 import useAuth from './hooks/useAuth';
 
 // Import Dashboard component
-import Dashboard from './components/dashboard/Dashboard';
+import Dashboard from './components/dashboard/CommunityDashboard';
 
 // Create React Query client
 const queryClient = new QueryClient({
