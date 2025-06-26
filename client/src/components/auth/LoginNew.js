@@ -68,16 +68,6 @@ const Login = ({ onLogin }) => {
     }
   };
 
-  const handleDemoLogin = async () => {
-    try {
-      // Use demo credentials from seeded data
-      const response = await login('admin@prometheuscommunity.com', 'admin123');
-      onLogin(response.user);
-    } catch (error) {
-      console.error('Demo login failed:', error);
-    }
-  };
-
   const handleRegistrationChange = (field, value) => {
     setRegistrationData(prev => ({
       ...prev,
@@ -252,20 +242,6 @@ const Login = ({ onLogin }) => {
               </button>
             </form>
           )}
-
-          {/* Demo Login */}
-          <div className="mt-6 pt-4 border-t border-gray-700">
-            <button
-              onClick={handleDemoLogin}
-              disabled={loading}
-              className="w-full bg-gray-800/50 border border-gray-600 text-gray-300 font-medium py-2 px-4 rounded-lg hover:bg-gray-700/50 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Loading...' : 'Try Demo (Admin Account)'}
-            </button>
-            <p className="text-gray-500 text-xs text-center mt-2">
-              Demo credentials: admin@prometheuscommunity.com / admin123
-            </p>
-          </div>
         </div>
 
         {/* Beta Info */}

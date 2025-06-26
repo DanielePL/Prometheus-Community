@@ -1,276 +1,277 @@
-// client/src/components/dashboard/MessagesSimple.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const MessagesSimple = ({ user }) => {
-  const [selectedChat, setSelectedChat] = useState(1);
+  const [chats, setChats] = useState([]);
+  const [messages, setMessages] = useState({});
+  const [selectedChat, setSelectedChat] = useState(null);
   const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const chats = [
-    {
-      id: 1,
-      name: 'Alex Chen',
-      avatar: 'AC',
-      lastMessage: 'Great session today! How did your deadlifts go?',
-      timestamp: '2 min ago',
-      unread: 2,
-      online: true
-    },
-    {
-      id: 2,
-      name: 'Training Group',
-      avatar: 'TG',
-      lastMessage: 'Sarah: Anyone up for a weekend session?',
-      timestamp: '1h ago',
-      unread: 0,
-      online: false,
-      isGroup: true
-    },
-    {
-      id: 3,
-      name: 'Mike Rodriguez',
-      avatar: 'MR',
-      lastMessage: 'Thanks for the form tips!',
-      timestamp: '3h ago',
-      unread: 1,
-      online: false
-    },
-    {
-      id: 4,
-      name: 'Emma Wilson',
-      avatar: 'EW',
-      lastMessage: 'Check out this new program I found',
-      timestamp: 'Yesterday',
-      unread: 0,
-      online: true
-    }
-  ];
+  // Fetch messages from API
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/messages', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-  const messages = {
-    1: [
-      {
-        id: 1,
-        sender: 'Alex Chen',
-        avatar: 'AC',
-        message: 'Hey! How was your training today?',
-        timestamp: '14:30',
-        isOwn: false
-      },
-      {
-        id: 2,
-        sender: 'You',
-        avatar: 'DP',
-        message: 'Really good! Hit a new PR on deadlift - 220kg!',
-        timestamp: '14:32',
-        isOwn: true
-      },
-      {
-        id: 3,
-        sender: 'Alex Chen',
-        avatar: 'AC',
-        message: 'Wow, thats amazing! 🔥 What was your previous best?',
-        timestamp: '14:33',
-        isOwn: false
-      },
-      {
-        id: 4,
-        sender: 'You',
-        avatar: 'DP',
-        message: '215kg, so only 5kg improvement but it felt much easier this time',
-        timestamp: '14:35',
-        isOwn: true
-      },
-      {
-        id: 5,
-        sender: 'Alex Chen',
-        avatar: 'AC',
-        message: 'Great session today! How did your deadlifts go?',
-        timestamp: '15:42',
-        isOwn: false
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Group messages by conversation
+        const groupedMessages = {};
+        const conversationsList = [];
+        
+        data.forEach(message => {
+          const conversationId = message.conversation?._id || message.conversationId;
+          if (!groupedMessages[conversationId]) {
+            groupedMessages[conversationId] = [];
+            
+            // Add to conversations list
+            conversationsList.push({
+              id: conversationId,
+              name: message.sender?.name !== user?.name ? message.sender?.name : message.recipient?.name,
+              avatar: (message.sender?.name !== user?.name ? message.sender?.name : message.recipient?.name)?.charAt(0) || 'U',
+              lastMessage: message.content,
+              timestamp: message.createdAt,
+              unread: message.sender?._id !== user?._id && !message.read ? 1 : 0,
+              online: false // You can implement online status later
+            });
+          }
+          groupedMessages[conversationId].push(message);
+        });
+
+        // Sort messages in each conversation by timestamp
+        Object.keys(groupedMessages).forEach(conversationId => {
+          groupedMessages[conversationId].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        });
+
+        // Sort conversations by last message timestamp
+        conversationsList.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        setChats(conversationsList);
+        setMessages(groupedMessages);
+        
+        // Select first chat if exists
+        if (conversationsList.length > 0) {
+          setSelectedChat(conversationsList[0].id);
+        }
+      } catch (err) {
+        console.error('Error fetching messages:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-    ]
-  };
+    };
 
-  const currentChat = chats.find(chat => chat.id === selectedChat);
-  const currentMessages = messages[selectedChat] || [];
+    fetchMessages();
+  }, [user]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // Here you would typically send the message to your backend
-      console.log('Sending message:', newMessage);
-      setNewMessage('');
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedChat) return;
+
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          conversationId: selectedChat,
+          content: newMessage
+        })
+      });
+
+      if (response.ok) {
+        const message = await response.json();
+        
+        // Add message to local state
+        setMessages(prev => ({
+          ...prev,
+          [selectedChat]: [...(prev[selectedChat] || []), message]
+        }));
+
+        // Update last message in chat list
+        setChats(prev => prev.map(chat => 
+          chat.id === selectedChat 
+            ? { ...chat, lastMessage: newMessage, timestamp: new Date().toISOString() }
+            : chat
+        ));
+
+        setNewMessage('');
+      }
+    } catch (err) {
+      console.error('Error sending message:', err);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) {
+      const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+      return diffInMinutes <= 1 ? 'Just now' : `${diffInMinutes}m ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else {
+      return date.toLocaleDateString();
     }
   };
+
+  const formatMessageTime = (timestamp) => {
+    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-400 mb-4">Error loading messages: {error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Messages Header */}
-      <div className="bg-gray-800 rounded-xl p-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-white">Messages</h1>
-          <div className="flex space-x-2">
-            <button className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg text-sm">
-              💬 New Chat
-            </button>
-            <button className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg text-sm">
-              👥 Groups
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Chat Container */}
-      <div className="bg-gray-800 rounded-xl overflow-hidden h-[700px] flex">
-        {/* Chat List Sidebar */}
-        <div className="w-80 bg-gray-800 border-r border-gray-700">
+    <div className="bg-gray-900 rounded-xl border border-gray-700 h-96 flex">
+      {/* Chat List */}
+      <div className="w-1/3 border-r border-gray-700 flex flex-col">
         <div className="p-4 border-b border-gray-700">
-          <h3 className="text-lg font-medium text-white">Conversations</h3>
-          <div className="mt-3 relative">
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
-          </div>
+          <h3 className="text-white font-semibold">Messages</h3>
         </div>
-
-        <div className="overflow-y-auto">
-          {chats.map(chat => (
-            <div
-              key={chat.id}
-              onClick={() => setSelectedChat(chat.id)}
-              className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-gray-700 ${
-                selectedChat === chat.id ? 'bg-gray-700' : ''
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
-                    chat.isGroup ? 'bg-blue-500' : 'bg-orange-500'
+        
+        <div className="flex-1 overflow-y-auto">
+          {chats.length === 0 ? (
+            <div className="p-4 text-center text-gray-400">
+              No conversations yet
+            </div>
+          ) : (
+            chats.map((chat) => (
+              <div
+                key={chat.id}
+                onClick={() => setSelectedChat(chat.id)}
+                className={`p-4 border-b border-gray-800 cursor-pointer hover:bg-gray-800 transition-colors ${
+                  selectedChat === chat.id ? 'bg-gray-800' : ''
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold relative ${
+                    chat.online ? 'ring-2 ring-green-400' : ''
                   }`}>
                     {chat.avatar}
+                    {chat.online && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-900"></div>
+                    )}
                   </div>
-                  {chat.online && (
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800"></div>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-white font-medium truncate">{chat.name}</h4>
+                      <span className="text-xs text-gray-400">{formatTime(chat.timestamp)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-gray-400 truncate">{chat.lastMessage}</p>
+                      {chat.unread > 0 && (
+                        <span className="bg-orange-500 text-white text-xs rounded-full px-2 py-1 min-w-5 text-center">
+                          {chat.unread}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-white font-medium truncate">{chat.name}</h3>
-                    <span className="text-gray-400 text-xs">{chat.timestamp}</span>
-                  </div>
-                  <p className="text-gray-400 text-sm truncate">{chat.lastMessage}</p>
-                </div>
-                {chat.unread > 0 && (
-                  <div className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {chat.unread}
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
-      {/* Chat Window */}
+      {/* Chat Messages */}
       <div className="flex-1 flex flex-col">
-        {currentChat ? (
+        {selectedChat ? (
           <>
             {/* Chat Header */}
-            <div className="bg-gray-800 border-b border-gray-700 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                      currentChat.isGroup ? 'bg-blue-500' : 'bg-orange-500'
-                    }`}>
-                      {currentChat.avatar}
-                    </div>
-                    {currentChat.online && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-white font-medium">{currentChat.name}</h3>
-                    <p className="text-gray-400 text-sm">
-                      {currentChat.online ? 'Online' : 'Last seen recently'}
-                    </p>
-                  </div>
+            <div className="p-4 border-b border-gray-700">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                  {chats.find(c => c.id === selectedChat)?.avatar}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button className="text-gray-400 hover:text-white p-2">📞</button>
-                  <button className="text-gray-400 hover:text-white p-2">📹</button>
-                  <button className="text-gray-400 hover:text-white p-2">⋯</button>
+                <div>
+                  <h4 className="text-white font-semibold">
+                    {chats.find(c => c.id === selectedChat)?.name}
+                  </h4>
+                  <p className="text-xs text-gray-400">
+                    {chats.find(c => c.id === selectedChat)?.online ? 'Online' : 'Offline'}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {currentMessages.map(message => (
+              {messages[selectedChat]?.map((message, index) => (
                 <div
-                  key={message.id}
-                  className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
+                  key={index}
+                  className={`flex ${message.sender?._id === user?._id ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${
-                    message.isOwn ? 'flex-row-reverse space-x-reverse' : ''
-                  }`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${
-                      message.isOwn ? 'bg-orange-500' : 'bg-gray-600'
-                    }`}>
-                      {message.avatar}
-                    </div>
-                    <div>
-                      <div className={`p-3 rounded-lg ${
-                        message.isOwn 
-                          ? 'bg-orange-500 text-white' 
-                          : 'bg-gray-700 text-white'
-                      }`}>
-                        <p className="text-sm">{message.message}</p>
-                      </div>
-                      <p className={`text-xs text-gray-400 mt-1 ${
-                        message.isOwn ? 'text-right' : 'text-left'
-                      }`}>
-                        {message.timestamp}
-                      </p>
-                    </div>
+                  <div
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      message.sender?._id === user?._id
+                        ? 'bg-orange-600 text-white'
+                        : 'bg-gray-700 text-gray-200'
+                    }`}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                    <p className="text-xs mt-1 opacity-70">
+                      {formatMessageTime(message.createdAt)}
+                    </p>
                   </div>
                 </div>
-              ))}
+              )) || (
+                <div className="text-center text-gray-400">
+                  No messages in this conversation yet
+                </div>
+              )}
             </div>
 
             {/* Message Input */}
-            <div className="bg-gray-800 border-t border-gray-700 p-4">
-              <div className="flex items-center space-x-3">
-                <button className="text-gray-400 hover:text-white">📎</button>
-                <div className="flex-1 relative">
-                  <textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type a message..."
-                    className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    rows="1"
-                  />
-                </div>
-                <button className="text-gray-400 hover:text-white">😊</button>
+            <div className="p-4 border-t border-gray-700">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
                 <button
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim()}
-                  className={`p-3 rounded-lg ${
-                    newMessage.trim()
-                      ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  }`}
+                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  ➤
+                  Send
                 </button>
               </div>
             </div>
@@ -278,13 +279,10 @@ const MessagesSimple = ({ user }) => {
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <span className="text-6xl">💬</span>
-              <h3 className="text-xl font-semibold text-white mt-4">Select a conversation</h3>
-              <p className="text-gray-400 mt-2">Choose a chat to start messaging</p>
+              <p className="text-gray-400 text-lg">Select a conversation to start messaging</p>
             </div>
           </div>
         )}
-      </div>
       </div>
     </div>
   );
