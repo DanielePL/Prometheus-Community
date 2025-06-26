@@ -166,7 +166,6 @@ const userSchema = new mongoose.Schema({
 });
 
 // Indexes for performance
-userSchema.index({ email: 1 });
 userSchema.index({ 'stats.campusPoints': -1 });
 userSchema.index({ lastActive: -1 });
 userSchema.index({ subscription: 1 });

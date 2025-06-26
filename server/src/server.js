@@ -95,8 +95,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/events', eventRoutes);
-// app.use('/api/challenges', challengeRoutes);
-// app.use('/api/messages', messageRoutes);
+app.use('/api/challenges', challengeRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {

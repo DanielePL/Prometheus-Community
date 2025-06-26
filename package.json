@@ -2,6 +2,7 @@
   "name": "prometheus-community",
   "version": "1.0.0",
   "description": "AI-Powered Strength Training Community Platform",
+  "main": "index.js",
   "private": true,
   "workspaces": [
     "client",
@@ -9,6 +10,7 @@
     "ai-engine"
   ],
   "scripts": {
+    "start": "node index.js",
     "setup:all": "npm install && npm run setup:client && npm run setup:server && npm run setup:ai",
     "setup:client": "cd client && npm install",
     "setup:server": "cd server && npm install", 
@@ -46,6 +48,28 @@
     
     "clean": "rm -rf node_modules client/node_modules server/node_modules client/build server/dist",
     "reset": "npm run clean && npm run setup:all"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "express-validator": "^7.0.1",
+    "express-rate-limit": "^6.8.1",
+    "compression": "^1.7.4",
+    "mongoose": "^8.0.3",
+    "redis": "^4.6.7",
+    "socket.io": "^4.7.2",
+    "multer": "^1.4.5-lts.1",
+    "cloudinary": "^1.38.0",
+    "nodemailer": "^6.9.4",
+    "joi": "^17.9.2",
+    "uuid": "^9.0.0",
+    "winston": "^3.10.0",
+    "moment": "^2.30.1"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",

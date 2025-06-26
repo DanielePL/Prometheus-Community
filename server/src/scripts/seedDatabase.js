@@ -20,7 +20,7 @@ const sampleUsers = [
     password: 'admin123',
     name: 'Admin User',
     role: 'admin',
-    isVerified: true,
+    verified: true,
     profile: {
       bio: 'Community administrator and fitness enthusiast',
       location: 'Digital Ocean',
@@ -33,8 +33,8 @@ const sampleUsers = [
     email: 'john@example.com',
     password: 'password123',
     name: 'John Doe',
-    role: 'user',
-    isVerified: true,
+    role: 'member',
+    verified: true,
     profile: {
       bio: 'Powerlifter and VBT enthusiast',
       location: 'New York, USA',
@@ -47,10 +47,9 @@ const sampleUsers = [
     email: 'jane@example.com',
     password: 'password123',
     name: 'Jane Smith',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    role: 'user',
-    isVerified: true,
+    name: 'Jane Smith',
+    role: 'coach',
+    verified: true,
     profile: {
       bio: 'Olympic weightlifter and coach',
       location: 'California, USA',
@@ -64,14 +63,14 @@ const samplePosts = [
   {
     title: 'Welcome to Prometheus Community!',
     content: 'Welcome to our strength training community! Share your workouts, connect with fellow athletes, and track your progress using velocity-based training.',
-    type: 'announcement',
+    type: 'general',
     tags: ['welcome', 'community', 'vbt'],
     isPublic: true
   },
   {
     title: 'VBT Training Tips for Beginners',
     content: 'Velocity-based training can seem intimidating at first, but here are some key tips to get started:\n\n1. Start with compound movements\n2. Focus on bar speed over weight\n3. Use autoregulation based on velocity feedback\n4. Track your progress consistently',
-    type: 'educational',
+    type: 'tip',
     tags: ['vbt', 'beginners', 'tips'],
     isPublic: true
   }
@@ -81,7 +80,8 @@ const sampleEvents = [
   {
     title: 'Monthly Strength Challenge',
     description: 'Join our monthly strength challenge! Test your max lifts and compete with community members.',
-    type: 'challenge',
+    type: 'competition',
+    category: 'Core',
     startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
     endDate: new Date(Date.now() + 37 * 24 * 60 * 60 * 1000), // 1 month + 1 week from now
     location: 'Virtual',
@@ -93,6 +93,7 @@ const sampleEvents = [
     title: 'VBT Workshop: Advanced Techniques',
     description: 'Learn advanced velocity-based training techniques from industry experts.',
     type: 'workshop',
+    category: 'Academy',
     startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
     endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 hours later
     location: 'Online Zoom Session',
