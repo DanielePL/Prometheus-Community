@@ -133,6 +133,9 @@ const EventsSimple = ({ user }) => {
       <div className="bg-gray-800 rounded-xl p-6 min-h-[600px]">
         <div className="space-y-4">
         {events[activeView].map(event => {
+          // Add safety check for event object
+          if (!event) return null;
+          
           const typeInfo = getEventTypeInfo(event.type);
           
           return (

@@ -16,9 +16,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [contextId] = useState(() => Math.random().toString(36).substring(7));
-
-  console.log(`AuthProvider render - Context ID: ${contextId}, User:`, user);
 
   useEffect(() => {
     // Check for saved token and get current user
@@ -49,39 +46,8 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
-      console.log('Calling apiService.login...');
       const response = await apiService.login(email, password);
-      console.log('API response:', response);
-      
-      if (response.user) {
-        console.log('Setting user to:', response.user);
-        setUser(prevUser => {
-          console.log('Previous user:', prevUser);
-          console.log('New user:', response.user);
-          console.log('Setting user state now...');
-          
-          // Add a debug log to window so we can see it
-          if (typeof window !== 'undefined') {
-            window.debugAuthState = {
-              previous: prevUser,
-              new: response.user,
-              timestamp: new Date().toISOString()
-            };
-            console.log('Debug state saved to window.debugAuthState');
-          }
-          
-          return response.user;
-        });
-        console.log('User state should be set now');
-        
-        // Add a small delay to ensure state update
-        await new Promise(resolve => setTimeout(resolve, 100));
-        console.log('After delay - user should be set');
-      } else {
-        console.error('No user in response:', response);
-        throw new Error('No user data in response');
-      }
-      
+      setUser(response.user);
       console.log('Login successful:', response.user);
       return response;
     } catch (error) {
@@ -146,13 +112,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUserProfile,
-    isAuthenticated: !!user,
-    contextId,
-    // Debug function
-    debugSetUser: (userData) => {
-      console.log('Debug setUser called with:', userData);
-      setUser(userData);
-    }
+    isAuthenticated: !!user
   };
 
   return (

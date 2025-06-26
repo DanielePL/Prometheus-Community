@@ -29,9 +29,8 @@
     "test:e2e": "cypress run",
     "test:coverage": "npm run test:client -- --coverage && npm run test:server -- --coverage",
     
-    "db:migrate": "cd server && npm run migrate",
     "db:seed": "cd server && npm run seed",
-    "db:reset": "cd server && npm run migrate:rollback && npm run migrate && npm run seed",
+    "db:setup": "cd server && npm run seed",
     
     "lint": "npm run lint:client && npm run lint:server",
     "lint:client": "cd client && eslint src/",

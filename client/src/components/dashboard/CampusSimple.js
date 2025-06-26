@@ -413,10 +413,11 @@ const CampusSimple = ({ user }) => {
         )}
 
         {/* Individual Track Content */}
-        {activeTrack !== 'overview' && (
+        {activeTrack !== 'overview' && activeTrack !== 'calendar' && (
           <div className="space-y-6">
             {(() => {
               const track = campusTracks.find(t => t.id === activeTrack);
+              if (!track) return null; // Safety check
               return (
                 <div>
                   <div className="flex items-center space-x-4 mb-6">

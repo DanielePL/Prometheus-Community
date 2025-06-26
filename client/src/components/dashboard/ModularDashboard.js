@@ -9,9 +9,11 @@ import EventsSimple from './EventsSimple';
 import MessagesSimple from './MessagesSimple';
 import SettingsSimple from './SettingsSimple';
 import CampusSimple from './CampusSimple';
+import AdminPanel from '../admin/AdminPanel';
 
 const ModularDashboard = ({ user, onLogout }) => {
   const [activeSection, setActiveSection] = useState('campus'); // Start with Campus as default
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [settings, setSettings] = useState({
     notifications: {
       email: true,
@@ -50,12 +52,20 @@ const ModularDashboard = ({ user, onLogout }) => {
     }
   };
 
+  // Check if user has admin access
+  const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
+
   // Handle user clicks for navigation to profile views
   const handleUserClick = (selectedUser) => {
     console.log('User clicked:', selectedUser);
     // Could navigate to user's profile or show user modal
     // For now, just log the action
   };
+
+  // If admin panel is shown, render it instead of the normal dashboard
+  if (showAdminPanel) {
+    return <AdminPanel user={user} onBack={() => setShowAdminPanel(false)} />;
+  }
 
   // Render the appropriate component based on active section
   const renderContent = () => {
@@ -162,6 +172,14 @@ const ModularDashboard = ({ user, onLogout }) => {
           </div>
           
           <div className="flex items-center space-x-4">
+            {isAdmin && (
+              <button 
+                onClick={() => setShowAdminPanel(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium flex items-center"
+              >
+                <span className="mr-2">⚙️</span>Admin Panel
+              </button>
+            )}
             <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium">
               Join Beta
             </button>
@@ -278,6 +296,17 @@ const ModularDashboard = ({ user, onLogout }) => {
             >
               <span className="mr-3">⚙️</span>Settings
             </button>
+            
+            {/* Admin Panel Access */}
+            {isAdmin && (
+              <button 
+                onClick={() => setShowAdminPanel(true)}
+                className="w-full flex items-center px-4 py-3 rounded-lg text-purple-400 hover:text-white hover:bg-purple-500/20 border-t border-gray-800 mt-4 pt-4"
+              >
+                <span className="mr-3">🛠️</span>Admin Panel
+                <span className="ml-auto bg-purple-500 text-white text-xs px-2 py-1 rounded-full">ADMIN</span>
+              </button>
+            )}
           </nav>
         </div>
 

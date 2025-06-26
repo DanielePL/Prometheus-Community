@@ -63,7 +63,7 @@ Icons     → Lucide React
 Routing   → React Router v6
 State     → React Query + Context API
 Backend   → Node.js + Express (Geplant)
-Database  → PostgreSQL (Geplant) 
+Database  → MongoDB (Digital Ocean) 
 AI/ML     → Python + TensorFlow (Geplant)
 DevOps    → Docker + GitHub Actions (Setup)
 ```

@@ -8,9 +8,12 @@ import interactionPlugin from '@fullcalendar/interaction';
 const PrometheusCalendar = ({ user }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
+  // ✅ FIXED: Modern state for event creation
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newEventData, setNewEventData] = useState({ title: '', start: '', end: '' });
   const calendarRef = useRef(null);
 
-  // Campus Events für das 12-Monats-Programm
+  // Campus Events for the 12-month program
   const campusEvents = [
     // Juni 2025
     {
@@ -61,7 +64,6 @@ const PrometheusCalendar = ({ user }) => {
         category: 'Coach Lab'
       }
     },
-
     // Juli 2025
     {
       id: '4',
@@ -143,7 +145,6 @@ const PrometheusCalendar = ({ user }) => {
         category: 'Business Builder'
       }
     },
-
     // August 2025
     {
       id: '9',
@@ -184,27 +185,41 @@ const PrometheusCalendar = ({ user }) => {
     setShowEventModal(true);
   };
 
+  // ✅ FIXED: Modern event creation without prompt()
   const handleDateSelect = (selectInfo) => {
-    const title = prompt('Event Title:');
+    setNewEventData({
+      title: '',
+      start: selectInfo.startStr,
+      end: selectInfo.endStr,
+      allDay: selectInfo.allDay
+    });
+    setShowCreateModal(true);
+    
+    // Clear selection
     const calendarApi = selectInfo.view.calendar;
+    calendarApi.unselect();
+  };
 
-    calendarApi.unselect(); // clear date selection
-
-    if (title) {
+  const handleCreateEvent = () => {
+    if (newEventData.title.trim()) {
+      const calendarApi = calendarRef.current.getApi();
       calendarApi.addEvent({
         id: Date.now().toString(),
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-        allDay: selectInfo.allDay,
+        title: newEventData.title,
+        start: newEventData.start,
+        end: newEventData.end,
+        allDay: newEventData.allDay,
         backgroundColor: '#f97316',
         borderColor: '#ea580c'
       });
+      
+      setShowCreateModal(false);
+      setNewEventData({ title: '', start: '', end: '' });
     }
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('de-DE', {
+    return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -212,9 +227,10 @@ const PrometheusCalendar = ({ user }) => {
   };
 
   const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString('de-DE', {
+    return new Date(date).toLocaleTimeString('en-US', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -252,7 +268,7 @@ const PrometheusCalendar = ({ user }) => {
           <div className="space-y-4 mb-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-700 p-4 rounded-lg">
-                <div className="text-gray-400 text-sm mb-1">Datum & Zeit</div>
+                <div className="text-gray-400 text-sm mb-1">Date & Time</div>
                 <div className="text-white font-medium">
                   {formatDate(selectedEvent.start)}
                 </div>
@@ -269,7 +285,7 @@ const PrometheusCalendar = ({ user }) => {
 
             {props.description && (
               <div className="bg-gray-700 p-4 rounded-lg">
-                <div className="text-gray-400 text-sm mb-1">Beschreibung</div>
+                <div className="text-gray-400 text-sm mb-1">Description</div>
                 <div className="text-white">{props.description}</div>
               </div>
             )}
@@ -279,17 +295,17 @@ const PrometheusCalendar = ({ user }) => {
                 <div className="text-orange-500 text-xl font-bold">
                   {props.attendees > 0 ? props.attendees.toLocaleString() : 'TBA'}
                 </div>
-                <div className="text-gray-400 text-sm">Angemeldet</div>
+                <div className="text-gray-400 text-sm">Registered</div>
               </div>
               <div className="text-center">
                 <div className="text-green-500 text-xl font-bold">
                   {Math.floor((new Date(selectedEvent.end) - new Date(selectedEvent.start)) / (1000 * 60))}
                 </div>
-                <div className="text-gray-400 text-sm">Minuten</div>
+                <div className="text-gray-400 text-sm">Minutes</div>
               </div>
               <div className="text-center">
                 <div className="text-blue-500 text-xl font-bold">Free</div>
-                <div className="text-gray-400 text-sm">Preis</div>
+                <div className="text-gray-400 text-sm">Price</div>
               </div>
             </div>
           </div>
@@ -297,14 +313,14 @@ const PrometheusCalendar = ({ user }) => {
           {/* Actions */}
           <div className="space-y-3">
             <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-bold text-lg">
-              🎯 Für Event anmelden
+              🎯 Register for Event
             </button>
             <div className="grid grid-cols-2 gap-3">
               <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium">
-                📅 Zu Kalender hinzufügen
+                📅 Add to Calendar
               </button>
               <button className="bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg font-medium">
-                📤 Event teilen
+                📤 Share Event
               </button>
             </div>
           </div>
@@ -312,8 +328,84 @@ const PrometheusCalendar = ({ user }) => {
           {/* Event Info */}
           <div className="mt-6 pt-4 border-t border-gray-600">
             <div className="flex items-center justify-between text-sm text-gray-400">
-              <span>Event wird aufgezeichnet</span>
-              <span>Live Q&A inklusive</span>
+              <span>Event will be recorded</span>
+              <span>Live Q&A included</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ✅ NEW FEATURE: Modern Event Creation Modal
+  const CreateEventModal = () => {
+    if (!showCreateModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Create New Event</h2>
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="text-gray-400 hover:text-white p-2"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-300 text-sm mb-2">Event Title</label>
+              <input
+                type="text"
+                value={newEventData.title}
+                onChange={(e) => setNewEventData({ ...newEventData, title: e.target.value })}
+                placeholder="Enter event title..."
+                className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                autoFocus
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-300 text-sm mb-2">Start</label>
+                <input
+                  type="datetime-local"
+                  value={newEventData.start}
+                  onChange={(e) => setNewEventData({ ...newEventData, start: e.target.value })}
+                  className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 text-sm mb-2">End</label>
+                <input
+                  type="datetime-local"
+                  value={newEventData.end}
+                  onChange={(e) => setNewEventData({ ...newEventData, end: e.target.value })}
+                  className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 pt-4">
+              <button
+                onClick={handleCreateEvent}
+                disabled={!newEventData.title.trim()}
+                className={`flex-1 py-3 rounded-lg font-medium ${
+                  newEventData.title.trim()
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                Create Event
+              </button>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -327,19 +419,19 @@ const PrometheusCalendar = ({ user }) => {
       <div className="grid grid-cols-4 gap-4">
         <div className="bg-gray-700 p-4 rounded-lg text-center">
           <div className="text-orange-500 text-2xl font-bold">{campusEvents.length}</div>
-          <div className="text-gray-300 text-sm">Events insgesamt</div>
+          <div className="text-gray-300 text-sm">Total Events</div>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg text-center">
           <div className="text-green-500 text-2xl font-bold">6</div>
-          <div className="text-gray-300 text-sm">Angemeldet</div>
+          <div className="text-gray-300 text-sm">Registered</div>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg text-center">
           <div className="text-blue-500 text-2xl font-bold">4</div>
-          <div className="text-gray-300 text-sm">Teilgenommen</div>
+          <div className="text-gray-300 text-sm">Attended</div>
         </div>
         <div className="bg-gray-700 p-4 rounded-lg text-center">
           <div className="text-purple-500 text-2xl font-bold">89%</div>
-          <div className="text-gray-300 text-sm">Teilnahmequote</div>
+          <div className="text-gray-300 text-sm">Attendance Rate</div>
         </div>
       </div>
 
@@ -425,12 +517,12 @@ const PrometheusCalendar = ({ user }) => {
           select={handleDateSelect}
           eventClick={handleEventClick}
           height="600px"
-          locale="de"
+          locale="en"
           buttonText={{
-            today: 'Heute',
-            month: 'Monat',
-            week: 'Woche',
-            day: 'Tag'
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day'
           }}
           eventTimeFormat={{
             hour: '2-digit',
@@ -442,7 +534,7 @@ const PrometheusCalendar = ({ user }) => {
 
       {/* Event Categories Legend */}
       <div className="bg-gray-800 rounded-xl p-6">
-        <h3 className="text-white font-bold mb-4">Event-Kategorien</h3>
+        <h3 className="text-white font-bold mb-4">Event Categories</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="flex items-center space-x-2">
             <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
@@ -469,6 +561,9 @@ const PrometheusCalendar = ({ user }) => {
 
       {/* Event Modal */}
       {showEventModal && <EventModal />}
+      
+      {/* Create Event Modal */}
+      <CreateEventModal />
     </div>
   );
 };

@@ -1,14 +1,134 @@
 // client/src/components/auth/Login.js
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [timeLeft, setTimeLeft] = useState({});
   const [isActive, setIsActive] = useState(true);
+  const [debugMessages, setDebugMessages] = useState([]);
+  const [localUser, setLocalUser] = useState(null);
+  
+  const { login, loading, error, user, debugSetUser } = useAuth();
+  
+  // Add context debugging
+  const authContext = useAuth();
+  const contextId = authContext.contextId || 'unknown';
+
+  const addDebugMessage = (message) => {
+    setDebugMessages(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
+
+  const handleTestLocalState = () => {
+    addDebugMessage('Setting local user state...');
+    setLocalUser({
+      email: 'admin@prometheuscommunity.com',
+      firstName: 'Admin',
+      lastName: 'User',
+      role: 'admin'
+    });
+    addDebugMessage('Local user state set!');
+  };
 
   // Launch date: September 1st, 2025
   const launchDate = new Date('2025-09-01T00:00:00').getTime();
+
+  // Test API call directly
+  useEffect(() => {
+    const testApi = async () => {
+      try {
+        addDebugMessage('Testing direct API call...');
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: 'admin@prometheuscommunity.com',
+            password: 'admin123'
+          })
+        });
+        
+        const data = await response.json();
+        addDebugMessage(`API Response: ${JSON.stringify(data)}`);
+        
+        if (data.success && data.user) {
+          addDebugMessage('API call successful! Setting user...');
+          // Try to call the context login function
+          try {
+            await login('admin@prometheuscommunity.com', 'admin123');
+            addDebugMessage('Context login completed');
+          } catch (contextError) {
+            addDebugMessage(`Context login failed: ${contextError.message}`);
+          }
+
+          // Also try direct user state setting
+          addDebugMessage('Testing direct user state setting...');
+          if (debugSetUser) {
+            debugSetUser({
+              id: 1,
+              email: 'admin@prometheuscommunity.com',
+              firstName: 'Admin',
+              lastName: 'User',
+              role: 'admin'
+            });
+            addDebugMessage('Direct debugSetUser called - user should be set now');
+          } else {
+            addDebugMessage('ERROR: debugSetUser function not available');
+          }
+        }
+      } catch (error) {
+        addDebugMessage(`API test failed: ${error.message}`);
+      }
+    };
+    
+    // Run the test after 2 seconds
+    const timer = setTimeout(testApi, 2000);
+    return () => clearTimeout(timer);
+  }, [login, debugSetUser]);
+
+  const handleForceUserSet = () => {
+    addDebugMessage('Forcing user state directly...');
+    try {
+      if (debugSetUser) {
+        debugSetUser({
+          id: 1,
+          email: 'admin@prometheuscommunity.com',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: 'admin'
+        });
+        addDebugMessage('Direct debugSetUser called');
+      } else {
+        addDebugMessage('debugSetUser function not available');
+      }
+    } catch (error) {
+      addDebugMessage(`Force set error: ${error.message}`);
+    }
+  };
+
+  const handleTestLogin = async () => {
+    addDebugMessage('Test login starting...');
+    try {
+      addDebugMessage('Calling auth context login...');
+      const result = await login('admin@prometheuscommunity.com', 'admin123');
+      addDebugMessage(`Login result: ${JSON.stringify(result, null, 2)}`);
+      addDebugMessage(`User state after login: ${user ? user.email : 'still null'}`);
+      
+      // Check window debug state
+      if (typeof window !== 'undefined' && window.debugAuthState) {
+        addDebugMessage(`Window debug state: ${JSON.stringify(window.debugAuthState, null, 2)}`);
+      }
+      
+      // Wait a bit and check again
+      setTimeout(() => {
+        addDebugMessage(`User after timeout: ${user ? user.email : 'still null'}`);
+      }, 500);
+    } catch (error) {
+      addDebugMessage(`Login error: ${error.message}`);
+    }
+  };
 
   useEffect(() => {
     let intervalId = null;
@@ -35,24 +155,62 @@ const Login = ({ onLogin }) => {
     return () => clearInterval(intervalId);
   }, [isActive, launchDate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mock login for demo
-    onLogin({ 
-      name: 'Daniele Pauli', 
-      email, 
-      avatar: 'DP',
-      betaAccess: true 
-    });
+    try {
+      await login(email, password);
+      // Login success is handled by AuthContext
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
-  const handleDemoLogin = () => {
-    onLogin({ 
-      name: 'Daniele Pauli', 
-      email: 'daniele@prometheus.com', 
-      avatar: 'DP',
-      betaAccess: true 
-    });
+  const handleDemoLogin = async () => {
+    console.log('Demo login clicked!');
+    addDebugMessage('Demo login clicked!');
+    try {
+      setEmail('admin@prometheuscommunity.com');
+      setPassword('admin123');
+      addDebugMessage('About to call login function...');
+      console.log('About to call login function...');
+      const result = await login('admin@prometheuscommunity.com', 'admin123');
+      addDebugMessage(`Login function returned: ${JSON.stringify(result)}`);
+      console.log('Login function returned:', result);
+      // Login success is handled by AuthContext
+    } catch (error) {
+      addDebugMessage(`Demo login failed: ${error.message}`);
+      console.error('Demo login failed:', error);
+      console.error('Error details:', error.message);
+    }
+  };
+
+  const handleTestApiCall = async () => {
+    console.log('Testing direct API call...');
+    addDebugMessage('Testing direct API call...');
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: 'admin@prometheuscommunity.com',
+          password: 'admin123'
+        })
+      });
+      
+      const data = await response.json();
+      addDebugMessage(`Direct API response: ${JSON.stringify(data)}`);
+      console.log('Direct API response:', data);
+      
+      if (data.success) {
+        addDebugMessage('Direct API call successful!');
+        console.log('Direct API call successful!');
+      }
+    } catch (error) {
+      addDebugMessage(`Direct API call failed: ${error.message}`);
+      console.error('Direct API call failed:', error);
+    }
   };
 
   return (
@@ -103,11 +261,11 @@ const Login = ({ onLogin }) => {
               </span>
             </div>
             <h2 className="text-5xl font-black text-white mb-6 tracking-tight">
-              THE AI COACHING REVOLUTION LAUNCHES IN
+              THE ULTIMATE TRAINING COMMUNITY LAUNCHES IN
             </h2>
             <p className="text-xl text-gray-300 mb-6 max-w-3xl mx-auto leading-relaxed">
-              The world's first fully automated <span className="text-orange-500 font-semibold">AI-powered fitness platform</span> that 
-              transforms how you train, eat, and achieve your goals. Built for real people who want real results.
+              Where <span className="text-orange-500 font-semibold">elite coaching meets cutting-edge technology</span> - 
+              connecting athletes with world-class trainers in a community that pushes every member to their peak potential.
             </p>
           </div>
 
@@ -144,11 +302,11 @@ const Login = ({ onLogin }) => {
               </h3>
               <div className="space-y-6">
                 {[
-                  { icon: '🧠', title: 'Your Personal AI Coach', desc: 'Want to unlock your inner beast? Get a smart training plan that adapts to your progress and ensures you hit your goals faster than ever.' },
-                  { icon: '📱', title: 'Perfect Your Form', desc: 'Use your phone camera to check your technique in real-time. No more guessing - see exactly how to move for maximum results and injury prevention.' },
-                  { icon: '⚡', title: 'Track Your Power', desc: 'We measure your bar speed and movement quality for better muscle and strength development. Train smarter, not just harder.' },
-                  { icon: '🍎', title: 'Effortless Nutrition', desc: 'Just snap a photo of your meal and our AI tells you exactly what nutrients you\'re getting. No more tedious calorie counting.' },
-                  { icon: '👥', title: 'Expert Guidance', desc: 'Get access to professional coaches who can guide hundreds of athletes efficiently. Video calls, progress reviews, and personalized feedback.' }
+                  { icon: '🧠', title: 'Expert Coaching at Scale', desc: 'Get personalized guidance from certified professionals who understand your goals. Our platform amplifies their expertise to help hundreds of athletes simultaneously.' },
+                  { icon: '📱', title: 'Perfect Your Technique', desc: 'Use advanced movement analysis to refine your form in real-time. Get instant feedback that rivals having a coach standing right beside you.' },
+                  { icon: '⚡', title: 'Track Every Rep', desc: 'Monitor bar speed, power output, and movement quality for optimal training adaptations. Data-driven insights that serious athletes demand.' },
+                  { icon: '🍎', title: 'Nutrition Made Simple', desc: 'Smart nutrition tracking that adapts to your training demands. No more guesswork - just results-driven meal planning that fits your lifestyle.' },
+                  { icon: '👥', title: 'Elite Community Access', desc: 'Train alongside top athletes and coaches. Share knowledge, celebrate victories, and push each other to new heights in a supportive environment.' }
                 ].map((feature, index) => (
                   <div key={index} className="flex items-start space-x-5 bg-gray-900/80 rounded-2xl p-6 border border-gray-800/50 hover:border-orange-500/30 transition-all duration-300">
                     <span className="text-4xl">{feature.icon}</span>
@@ -190,6 +348,30 @@ const Login = ({ onLogin }) => {
               </p>
             </div>
 
+            {/* Debug Display */}
+            <div className="mt-4 bg-gray-800 rounded-xl p-4 border border-gray-700">
+              <h4 className="text-white font-bold mb-2">Debug Info:</h4>
+              <div className="text-xs text-gray-300 space-y-1">
+                <div>Context User: {user ? `${user.email} (${user.role})` : 'Not logged in'}</div>
+                <div>Local User: {localUser ? `${localUser.email} (${localUser.role})` : 'Not set'}</div>
+                <div>Loading: {loading ? 'Yes' : 'No'}</div>
+                <div>Error: {error || 'None'}</div>
+                <div>Is Authenticated: {user ? 'YES' : 'NO'}</div>
+                <div>Context ID: {contextId}</div>
+                <div className="mt-2">Recent messages:</div>
+                {debugMessages.map((msg, i) => (
+                  <div key={i} className="text-xs text-green-400">{msg}</div>
+                ))}
+              </div>
+            </div>
+
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-900/60 border border-red-700/50 rounded-xl p-4 mb-6 backdrop-blur-sm">
+                <p className="text-red-300 text-sm text-center font-medium">{error}</p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-8">
               <div>
                 <label className="block text-white font-semibold mb-3 text-lg">Email</label>
@@ -217,9 +399,18 @@ const Login = ({ onLogin }) => {
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-5 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl text-lg border border-orange-400/30"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-5 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-xl text-lg border border-orange-400/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                🚀 ENTER PROMETHEUS BETA
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing In...
+                  </span>
+                ) : '🚀 ENTER PROMETHEUS BETA'}
               </button>
             </form>
 
@@ -235,9 +426,46 @@ const Login = ({ onLogin }) => {
 
               <button
                 onClick={handleDemoLogin}
-                className="w-full mt-6 bg-gray-800 hover:bg-gray-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 border border-gray-700 hover:border-orange-500/50 text-lg"
+                disabled={loading}
+                className="w-full mt-6 bg-gray-800 hover:bg-gray-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 border border-gray-700 hover:border-orange-500/50 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                👨‍💻 Try Demo Access
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Loading Demo...
+                  </span>
+                ) : '👨‍💻 Try Demo Access'}
+              </button>
+
+              <button
+                onClick={handleForceUserSet}
+                className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 border border-red-500 text-lg"
+              >
+                🔥 Force Set User State
+              </button>
+
+              <button
+                onClick={handleTestLocalState}
+                className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 border border-purple-500 text-lg"
+              >
+                🎯 Test Local State
+              </button>
+
+              <button
+                onClick={handleTestLogin}
+                className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 border border-green-500 text-lg"
+              >
+                🧪 Test Auth Context Login
+              </button>
+
+              <button
+                onClick={handleTestApiCall}
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 border border-blue-500 text-lg"
+              >
+                🔧 Test Direct API Call
               </button>
             </div>
 
@@ -272,8 +500,8 @@ const Login = ({ onLogin }) => {
               🔥 Don't Miss the Launch!
             </h3>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              September 1st, 2025 - The most anticipated launch of an 
-              <span className="text-orange-500 font-semibold"> AI-powered fitness platform</span> in the industry.
+              September 1st, 2025 - Where <span className="text-orange-500 font-semibold">world-class coaching meets innovative technology</span> to create 
+              the most advanced training community in the industry.
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               <button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-10 rounded-xl transition-all duration-300 transform hover:scale-105 border border-orange-400/30 shadow-xl">

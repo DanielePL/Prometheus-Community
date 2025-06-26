@@ -1,22 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: prometheus-postgres
-    environment:
-      POSTGRES_DB: prometheus_community
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: prometheus123
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
-    networks:
-      - prometheus-network
-
   # Redis Cache
   redis:
     image: redis:7-alpine
@@ -38,15 +22,12 @@ services:
       - "5000:5000"
     environment:
       NODE_ENV: development
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: prometheus_community
-      DB_USER: postgres
-      DB_PASSWORD: prometheus123
+      MONGODB_URI: ${MONGODB_URI}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 7d
     depends_on:
-      - postgres
       - redis
     volumes:
       - ./server:/app
@@ -91,7 +72,6 @@ services:
       - prometheus-network
 
 volumes:
-  postgres_data:
   redis_data:
 
 networks:

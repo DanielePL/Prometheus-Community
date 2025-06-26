@@ -102,7 +102,7 @@ const FeedSimple = ({ user, handleUserClick }) => {
   };
 
   const getPostTypeInfo = (type, isLive) => {
-    if (isLive) return { color: 'text-red-500 bg-red-500/10', icon: '🔴', label: 'LIVE' };
+    if (isLive || type === 'live') return { color: 'text-red-500 bg-red-500/10', icon: '🔴', label: 'LIVE' };
     switch (type) {
       case 'workout': return { color: 'text-orange-500 bg-orange-500/10', icon: '💪', label: 'Workout' };
       case 'tip': return { color: 'text-blue-500 bg-blue-500/10', icon: '💡', label: 'Tip' };
@@ -217,186 +217,189 @@ const FeedSimple = ({ user, handleUserClick }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Posts Column */}
         <div className="lg:col-span-2 space-y-6 bg-gray-800 rounded-xl p-6 min-h-[600px]">
-      {posts.map(post => {
-        const typeInfo = getPostTypeInfo(post.type, post.isLive);
-        const isLiked = likedPosts.has(post.id);
-        const isSaved = savedPosts.has(post.id);
-        const showPostComments = showComments[post.id];
-        
-        return (
-          <div key={post.id} className="bg-gray-700 rounded-xl overflow-hidden">
-            {/* Post Header */}
-            <div className="p-6 pb-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div 
-                    className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:bg-orange-400 transition-colors"
-                    onClick={() => handleUserClick && handleUserClick(post.user)}
-                  >
-                    {post.user.avatar}
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-white font-semibold">{post.user.name}</span>
-                      {post.user.verified && <span className="text-orange-500">✓</span>}
-                      {post.badge && (
-                        <span className="bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full text-xs">
-                          🏆 {post.badge}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-400">
-                      <span>{post.timestamp}</span>
-                      {post.location && (
-                        <>
-                          <span>•</span>
-                          <span>📍 {post.location}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${typeInfo.color}`}>
-                    {typeInfo.icon} {typeInfo.label}
-                  </span>
-                  {post.isLive && post.viewers && (
-                    <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs">
-                      👁️ {post.viewers} watching
-                    </span>
-                  )}
-                  <button className="text-gray-400 hover:text-white p-1">
-                    ⋯
-                  </button>
-                </div>
-              </div>
-              
-              {/* Post Content */}
-              <p className="text-gray-300 mb-4 leading-relaxed">{post.content}</p>
-              
-              {/* Hashtags */}
-              {post.hashtags && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {post.hashtags.map((tag, index) => (
-                    <button key={index} className="text-orange-400 hover:text-orange-300 text-sm">
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              )}
-              
-              {/* Images/Media */}
-              {post.images && (
-                <div className={`grid gap-2 mb-4 ${
-                  post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
-                }`}>
-                  {post.images.map((image, index) => (
-                    <div key={index} className="bg-gray-700 rounded-lg p-8 text-center text-4xl">
-                      {image}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            {/* Interaction Stats */}
-            <div className="px-6 py-2 border-t border-b border-gray-700">
-              <div className="flex items-center justify-between text-sm text-gray-400">
-                <div className="flex items-center space-x-4">
-                  <span>❤️ {post.stats.likes + (isLiked ? 1 : 0)} likes</span>
-                  <span>💬 {post.stats.comments} comments</span>
-                  <span>🔄 {post.stats.shares} shares</span>
-                </div>
-                <span>{isSaved ? '🔖 Saved' : ''}</span>
-              </div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <button 
-                    onClick={() => handleLike(post.id)}
-                    className={`flex items-center space-x-2 transition-colors ${
-                      isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
-                    }`}
-                  >
-                    <span className={isLiked ? '❤️' : '🤍'}></span>
-                    <span>Like</span>
-                  </button>
-                  <button 
-                    onClick={() => toggleComments(post.id)}
-                    className="flex items-center space-x-2 text-gray-400 hover:text-orange-500 transition-colors"
-                  >
-                    <span>💬</span>
-                    <span>Comment</span>
-                  </button>
-                  <button className="flex items-center space-x-2 text-gray-400 hover:text-blue-500 transition-colors">
-                    <span>�</span>
-                    <span>Share</span>
-                  </button>
-                </div>
-                <button 
-                  onClick={() => handleSave(post.id)}
-                  className={`transition-colors ${
-                    isSaved ? 'text-orange-500' : 'text-gray-400 hover:text-orange-500'
-                  }`}
+    {posts.map(post => {
+      // Add safety checks for post object
+      if (!post || !post.user) return null;
+      
+      const typeInfo = getPostTypeInfo(post.type, post.isLive);
+      const isLiked = likedPosts.has(post.id);
+      const isSaved = savedPosts.has(post.id);
+      const showPostComments = showComments[post.id];
+      
+      return (
+        <div key={post.id} className="bg-gray-700 rounded-xl overflow-hidden">
+          {/* Post Header */}
+          <div className="p-6 pb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div 
+                  className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:bg-orange-400 transition-colors"
+                  onClick={() => handleUserClick && handleUserClick(post.user)}
                 >
-                  {isSaved ? '🔖' : '📄'}
+                  {post.user.avatar}
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-white font-semibold">{post.user.name}</span>
+                    {post.user.verified && <span className="text-orange-500">✓</span>}
+                    {post.badge && (
+                      <span className="bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full text-xs">
+                        🏆 {post.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-gray-400">
+                    <span>{post.timestamp}</span>
+                    {post.location && (
+                      <>
+                        <span>•</span>
+                        <span>📍 {post.location}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${typeInfo.color}`}>
+                  {typeInfo.icon} {typeInfo.label}
+                </span>
+                {post.isLive && post.viewers && (
+                  <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs">
+                    👁️ {post.viewers} watching
+                  </span>
+                )}
+                <button className="text-gray-400 hover:text-white p-1">
+                  ⋯
                 </button>
               </div>
             </div>
-
-            {/* Comments Section */}
-            {showPostComments && (
-              <div className="px-6 pb-4 border-t border-gray-700">
-                <div className="space-y-3 mb-4">
-                  {post.comments.map(comment => (
-                    <div key={comment.id} className="flex items-start space-x-3">
-                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                        {comment.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <div className="bg-gray-700 rounded-lg p-3">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <span className="text-white font-medium text-sm">{comment.user}</span>
-                            <span className="text-gray-400 text-xs">{comment.timestamp}</span>
-                          </div>
-                          <p className="text-gray-300 text-sm">{comment.comment}</p>
-                        </div>
-                        <div className="flex items-center space-x-4 mt-1 text-xs text-gray-400">
-                          <button className="hover:text-white">Like</button>
-                          <button className="hover:text-white">Reply</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Add Comment */}
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    {user?.avatar || 'U'}
+            
+            {/* Post Content */}
+            <p className="text-gray-300 mb-4 leading-relaxed">{post.content}</p>
+            
+            {/* Hashtags */}
+            {post.hashtags && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {post.hashtags.map((tag, index) => (
+                  <button key={index} className="text-orange-400 hover:text-orange-300 text-sm">
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {/* Images/Media */}
+            {post.images && (
+              <div className={`grid gap-2 mb-4 ${
+                post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+              }`}>
+                {post.images.map((image, index) => (
+                  <div key={index} className="bg-gray-700 rounded-lg p-8 text-center text-4xl">
+                    {image}
                   </div>
-                  <div className="flex-1 flex items-center space-x-2">
-                    <input
-                      type="text"
-                      placeholder="Write a comment..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      className="flex-1 bg-gray-700 text-white px-3 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                    <button className="text-orange-500 hover:text-orange-400">
-                      ➤
-                    </button>
-                  </div>
-                </div>
+                ))}
               </div>
             )}
           </div>
-        );
-      })}
+          
+          {/* Interaction Stats */}
+          <div className="px-6 py-2 border-t border-b border-gray-700">
+            <div className="flex items-center justify-between text-sm text-gray-400">
+              <div className="flex items-center space-x-4">
+                <span>❤️ {post.stats.likes + (isLiked ? 1 : 0)} likes</span>
+                <span>💬 {post.stats.comments} comments</span>
+                <span>🔄 {post.stats.shares} shares</span>
+              </div>
+              <span>{isSaved ? '🔖 Saved' : ''}</span>
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <button 
+                  onClick={() => handleLike(post.id)}
+                  className={`flex items-center space-x-2 transition-colors ${
+                    isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+                  }`}
+                >
+                  <span className={isLiked ? '❤️' : '🤍'}></span>
+                  <span>Like</span>
+                </button>
+                <button 
+                  onClick={() => toggleComments(post.id)}
+                  className="flex items-center space-x-2 text-gray-400 hover:text-orange-500 transition-colors"
+                >
+                  <span>💬</span>
+                  <span>Comment</span>
+                </button>
+                <button className="flex items-center space-x-2 text-gray-400 hover:text-blue-500 transition-colors">
+                  <span>�</span>
+                  <span>Share</span>
+                </button>
+              </div>
+              <button 
+                onClick={() => handleSave(post.id)}
+                className={`transition-colors ${
+                  isSaved ? 'text-orange-500' : 'text-gray-400 hover:text-orange-500'
+                }`}
+              >
+                {isSaved ? '🔖' : '📄'}
+              </button>
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          {showPostComments && (
+            <div className="px-6 pb-4 border-t border-gray-700">
+              <div className="space-y-3 mb-4">
+                {post.comments.map(comment => (
+                  <div key={comment.id} className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      {comment.avatar}
+                    </div>
+                    <div className="flex-1">
+                      <div className="bg-gray-700 rounded-lg p-3">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="text-white font-medium text-sm">{comment.user}</span>
+                          <span className="text-gray-400 text-xs">{comment.timestamp}</span>
+                        </div>
+                        <p className="text-gray-300 text-sm">{comment.comment}</p>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-1 text-xs text-gray-400">
+                        <button className="hover:text-white">Like</button>
+                        <button className="hover:text-white">Reply</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Add Comment */}
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                  {user?.avatar || 'U'}
+                </div>
+                <div className="flex-1 flex items-center space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="flex-1 bg-gray-700 text-white px-3 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <button className="text-orange-500 hover:text-orange-400">
+                    ➤
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    })}
         </div>
 
         {/* Sidebar */}
