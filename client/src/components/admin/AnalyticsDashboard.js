@@ -1,9 +1,9 @@
 // client/src/components/admin/AnalyticsDashboard.js
 import React, { useState, useEffect } from 'react';
-import { useApi } from '../../hooks/useApi';
+import { useAsyncOperation } from '../../hooks/useApi';
 
 const AnalyticsDashboard = ({ user }) => {
-  const { apiCall, loading, error } = useApi();
+  const { apiCall, loading, error } = useAsyncOperation();
   const [analytics, setAnalytics] = useState({
     overview: {
       totalUsers: 0,

@@ -47,10 +47,12 @@ const AppContent = () => {
 
   return (
     <div className="App">
-      <div className="bg-yellow-600 text-black p-2 text-center text-sm font-semibold">
-        🚨 DEVELOPMENT MODE - Authentication Bypassed
-      </div>
-      <ModularDashboard user={mockUser} onLogout={handleLogout} />
+      <ErrorBoundary>
+        <div className="bg-yellow-600 text-black p-2 text-center text-sm font-semibold">
+          🚨 DEVELOPMENT MODE - Authentication Bypassed
+        </div>
+        <ModularDashboard user={mockUser} onLogout={handleLogout} />
+      </ErrorBoundary>
     </div>
   );
 
