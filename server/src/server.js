@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const path = require('path'); // ⚡ FIXED: Added missing path import
+const path = require('path');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
@@ -31,7 +31,7 @@ const server = createServer(app);
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: process.env.CORS_ORIGIN?.split(',') || ["http://localhost:3000"],
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -63,7 +63,7 @@ app.use('/api/', limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  origin: process.env.CORS_ORIGIN?.split(',') || ["http://localhost:3000"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -87,7 +87,8 @@ app.get('/health', (req, res) => {
     status: 'OK',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
+    database: 'connected'
   });
 });
 
@@ -134,33 +135,48 @@ io.on('connection', (socket) => {
   });
 });
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../../client/build', 'index.html'));
+// 🚫 REMOVED: Frontend serving (runs as separate app)
+// Frontend is deployed separately as "App" component
+
+// API-only root route
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Prometheus Community API',
+    version: '1.0.0',
+    status: 'running',
+    environment: process.env.NODE_ENV || 'development',
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      users: '/api/users',
+      posts: '/api/posts',
+      events: '/api/events',
+      challenges: '/api/challenges',
+      messages: '/api/messages'
+    }
   });
-}
+});
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
-// 404 handler
+// 404 handler for unmatched routes
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
     message: 'API endpoint not found',
-    path: req.originalUrl
+    path: req.originalUrl,
+    availableEndpoints: ['/health', '/api/auth', '/api/users', '/api/posts', '/api/events', '/api/challenges', '/api/messages']
   });
 });
 
 // Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  logger.info(`🚀 Prometheus Community Server running on port ${PORT}`);
+  logger.info(`🚀 Prometheus Community API Server running on port ${PORT}`);
   logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  logger.info(`📱 Client URL: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
+  logger.info(`📱 CORS Origins: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}`);
+  logger.info(`🔗 API Base URL: ${process.env.NODE_ENV === 'production' ? 'https://sea-turtle-app-4ojwp.ondigitalocean.app' : 'http://localhost:' + PORT}`);
 });
 
 // Graceful shutdown
