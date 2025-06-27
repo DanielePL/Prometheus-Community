@@ -36,6 +36,26 @@ const AppContent = () => {
     );
   }
 
+  // BYPASS AUTHENTICATION FOR DEVELOPMENT
+  // Create mock user for testing
+  const mockUser = {
+    id: 'dev-user',
+    name: 'Daniel Pauli',
+    email: 'danielepauli@gmail.com',
+    role: 'admin'
+  };
+
+  return (
+    <div className="App">
+      <div className="bg-yellow-600 text-black p-2 text-center text-sm font-semibold">
+        🚨 DEVELOPMENT MODE - Authentication Bypassed
+      </div>
+      <ModularDashboard user={mockUser} onLogout={handleLogout} />
+    </div>
+  );
+
+  // ORIGINAL CODE (commented out for development)
+  /*
   return (
     <div className="App">
       <ErrorBoundary>
@@ -53,6 +73,7 @@ const AppContent = () => {
       </ErrorBoundary>
     </div>
   );
+  */
 };
 
 // Main App Component with AuthProvider

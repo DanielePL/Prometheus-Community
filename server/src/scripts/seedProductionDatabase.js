@@ -17,10 +17,10 @@ const logger = require('../config/logger');
 // Production admin users only (no demo users)
 const adminUsers = [
   {
-    username: 'admin',
-    email: 'admin@prometheuscommunity.com',
-    password: 'PrometheusAdmin2024!',
-    name: 'Prometheus Admin',
+    username: 'danielepauli',
+    email: 'danielepauli@gmail.com',
+    password: 'admin123',
+    name: 'Daniel Pauli',
     role: 'admin',
     verified: true,
     profile: {

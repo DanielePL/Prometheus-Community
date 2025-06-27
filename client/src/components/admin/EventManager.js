@@ -1,9 +1,9 @@
 // client/src/components/admin/EventManager.js
 import React, { useState, useEffect } from 'react';
-import { useApi } from '../../hooks/useApi';
+import { useAsyncOperation } from '../../hooks/useApi';
 
 const EventManager = ({ user }) => {
-  const { apiCall, loading, error } = useApi();
+  const { apiCall, loading, error } = useAsyncOperation();
   const [events, setEvents] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
@@ -12,7 +12,8 @@ const EventManager = ({ user }) => {
     description: '',
     startDate: '',
     endDate: '',
-    category: 'workshop',
+    type: 'workshop',
+    category: 'Academy',
     location: '',
     maxAttendees: 30,
     price: 0
@@ -24,9 +25,14 @@ const EventManager = ({ user }) => {
 
   const fetchEvents = async () => {
     try {
+      console.log('Fetching events...');
       const response = await apiCall('/api/events', 'GET');
+      console.log('Events fetch response:', response);
+      
       if (response.success) {
-        setEvents(response.data.events || response.data);
+        // Handle both possible response formats
+        const eventsData = response.data.events || response.data || [];
+        setEvents(eventsData);
       }
     } catch (err) {
       console.error('Error fetching events:', err);
@@ -41,13 +47,20 @@ const EventManager = ({ user }) => {
         endDate: new Date(newEvent.endDate).toISOString()
       };
       
+      console.log('Creating event with data:', eventData);
       const response = await apiCall('/api/events', 'POST', eventData);
+      console.log('Event creation response:', response);
+      
       if (response.success) {
-        setEvents([response.data, ...events]);
+        // Handle both possible response formats
+        const newEventData = response.data.event || response.data;
+        setEvents([newEventData, ...events]);
         resetForm();
+        alert('Event created successfully!');
       }
     } catch (err) {
       console.error('Error creating event:', err);
+      alert('Error creating event: ' + err.message);
     }
   };
 
@@ -56,8 +69,9 @@ const EventManager = ({ user }) => {
     setNewEvent({
       title: event.title,
       description: event.description,
-      startDate: event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : '',
-      endDate: event.endDate ? new Date(event.endDate).toISOString().split('T')[0] : '',
+      startDate: event.startDate ? new Date(event.startDate).toISOString().slice(0, 16) : '',
+      endDate: event.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : '',
+      type: event.type || 'workshop',
       category: event.category,
       location: event.location || '',
       maxAttendees: event.maxAttendees || 30,
@@ -104,7 +118,8 @@ const EventManager = ({ user }) => {
       description: '',
       startDate: '',
       endDate: '',
-      category: 'workshop',
+      type: 'workshop',
+      category: 'Academy',
       location: '',
       maxAttendees: 30,
       price: 0
@@ -183,24 +198,42 @@ const EventManager = ({ user }) => {
             </div>
             
             <div>
+              <label className="block text-white font-medium mb-2">Event Type</label>
+              <select
+                value={newEvent.type}
+                onChange={(e) => setNewEvent({...newEvent, type: e.target.value})}
+                className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-orange-500 focus:outline-none"
+              >
+                <option value="workshop">Workshop</option>
+                <option value="seminar">Seminar</option>
+                <option value="masterclass">Masterclass</option>
+                <option value="town-hall">Town Hall</option>
+                <option value="competition">Competition</option>
+                <option value="social">Social Event</option>
+                <option value="special">Special Event</option>
+              </select>
+            </div>
+            
+            <div>
               <label className="block text-white font-medium mb-2">Event Category</label>
               <select
                 value={newEvent.category}
                 onChange={(e) => setNewEvent({...newEvent, category: e.target.value})}
                 className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-orange-500 focus:outline-none"
               >
-                <option value="workshop">Workshop</option>
-                <option value="seminar">Seminar</option>
-                <option value="training">Training Session</option>
-                <option value="competition">Competition</option>
-                <option value="social">Social Event</option>
+                <option value="Core">Core</option>
+                <option value="Academy">Academy</option>
+                <option value="Coach Lab">Coach Lab</option>
+                <option value="Leadership">Leadership</option>
+                <option value="Business Builder">Business Builder</option>
+                <option value="Special Event">Special Event</option>
               </select>
             </div>
             
             <div>
-              <label className="block text-white font-medium mb-2">Start Date</label>
+              <label className="block text-white font-medium mb-2">Start Date & Time</label>
               <input
-                type="date"
+                type="datetime-local"
                 value={newEvent.startDate}
                 onChange={(e) => setNewEvent({...newEvent, startDate: e.target.value})}
                 className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-orange-500 focus:outline-none"
@@ -208,9 +241,9 @@ const EventManager = ({ user }) => {
             </div>
             
             <div>
-              <label className="block text-white font-medium mb-2">End Date</label>
+              <label className="block text-white font-medium mb-2">End Date & Time</label>
               <input
-                type="date"
+                type="datetime-local"
                 value={newEvent.endDate}
                 onChange={(e) => setNewEvent({...newEvent, endDate: e.target.value})}
                 className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-orange-500 focus:outline-none"

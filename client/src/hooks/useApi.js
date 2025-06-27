@@ -74,7 +74,38 @@ export const useAsyncOperation = () => {
     }
   }, []);
 
-  return { execute, loading, error };
+  // Simple apiCall function for direct API calls
+  const apiCall = useCallback(async (url, method = 'GET', data = null) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${url}`, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('prometheus_token')}`
+        },
+        body: data ? JSON.stringify(data) : null
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (err) {
+      setError(err.message || 'An error occurred');
+      console.error('API Call Error:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { execute, apiCall, loading, error };
 };
 
 // Hook for post operations
