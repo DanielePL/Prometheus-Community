@@ -1,100 +1,119 @@
 // client/src/components/dashboard/FeedSimple.js
 import React, { useState, useEffect } from 'react';
-import apiService from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
-const FeedSimple = ({ user }) => {
+const FeedSimple = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [newPost, setNewPost] = useState('');
-  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [error, setError] = useState('');
+  const { user, token } = useAuth();
 
-  // Fetch posts on component mount
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const response = await apiService.getPosts();
-        if (response.success) {
-          setPosts(response.data || []);
-        }
-      } catch (err) {
-        console.error('Error fetching posts:', err);
-        setError('Failed to load posts');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // API Base URL
+  const API_BASE = process.env.NODE_ENV === 'production' 
+    ? 'https://sea-turtle-app-4ojwp.ondigitalocean.app/api'
+    : 'http://localhost:5000/api';
 
-    fetchPosts();
-  }, []);
-
-  const handleCreatePost = async (e) => {
-    e.preventDefault();
-    if (!newPost.trim()) return;
-
+  // Fetch posts from real API
+  const fetchPosts = async () => {
     try {
-      const response = await apiService.createPost({
-        content: newPost.trim(),
-        type: 'text'
-      });
+      setLoading(true);
       
-      if (response.success) {
-        setPosts([response.data, ...posts]);
-        setNewPost('');
-        setShowCreatePost(false);
+      const response = await fetch(`${API_BASE}/posts/feed`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch posts: ${response.status}`);
       }
+
+      const data = await response.json();
+      
+      if (data.success && data.data && data.data.posts) {
+        setPosts(data.data.posts);
+      } else {
+        setPosts([]);
+      }
+      
+      setError('');
     } catch (err) {
-      console.error('Error creating post:', err);
-      setError('Failed to create post');
+      console.error('Error fetching posts:', err);
+      setError('Failed to load posts. Please try again.');
+      setPosts([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLikePost = async (postId) => {
+  // Like/Unlike post
+  const handleLike = async (postId) => {
     try {
-      const response = await apiService.likePost(postId);
-      if (response.success) {
-        setPosts(posts.map(post => 
-          post._id === postId 
-            ? { ...post, likes: response.data.likes, likeCount: response.data.likeCount }
-            : post
-        ));
+      const response = await fetch(`${API_BASE}/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Update post in local state
+        setPosts(prevPosts => 
+          prevPosts.map(post => 
+            post._id === postId 
+              ? { ...post, likeCount: (post.likeCount || 0) + 1, isLiked: !post.isLiked }
+              : post
+          )
+        );
       }
     } catch (err) {
       console.error('Error liking post:', err);
     }
   };
 
-  // Loading state
+  // Load posts on component mount
+  useEffect(() => {
+    if (token) {
+      fetchPosts();
+    }
+  }, [token]);
+
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto p-6 space-y-6">
-        <div className="bg-gray-800 rounded-xl p-6 animate-pulse">
-          <div className="h-4 bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-          <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-        </div>
-        <div className="bg-gray-800 rounded-xl p-6 animate-pulse">
-          <div className="h-4 bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-          <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+      <div className="bg-gray-900 rounded-lg p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">Community Feed</h3>
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="animate-pulse">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-10 h-10 bg-gray-700 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-700 rounded w-1/4 mb-2"></div>
+                  <div className="h-3 bg-gray-700 rounded w-1/6"></div>
+                </div>
+              </div>
+              <div className="h-4 bg-gray-700 rounded mb-2"></div>
+              <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
-  // Error state
   if (error) {
     return (
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="bg-red-900/50 border border-red-700 rounded-xl p-6 text-center">
-          <div className="text-red-400 text-xl mb-2">⚠️ Error Loading Feed</div>
-          <p className="text-red-300 mb-4">{error}</p>
+      <div className="bg-gray-900 rounded-lg p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">Community Feed</h3>
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+          <p className="text-red-400 text-sm mb-2">{error}</p>
           <button 
-            onClick={() => window.location.reload()}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+            onClick={fetchPosts}
+            className="text-orange-500 hover:text-orange-400 text-sm font-medium"
           >
-            Retry
+            Try Again
           </button>
         </div>
       </div>
@@ -102,104 +121,91 @@ const FeedSimple = ({ user }) => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      {/* Feed Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">🔥 Community Feed</h2>
-        <button
-          onClick={() => setShowCreatePost(!showCreatePost)}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium"
+    <div className="bg-gray-900 rounded-lg p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-semibold text-white">Community Feed</h3>
+        <button 
+          onClick={fetchPosts}
+          className="text-orange-500 hover:text-orange-400 text-sm font-medium"
         >
-          ✍️ Create Post
+          Refresh
         </button>
       </div>
 
-      {/* Create Post Form */}
-      {showCreatePost && (
-        <div className="bg-gray-800 rounded-xl p-6">
-          <form onSubmit={handleCreatePost}>
-            <div className="mb-4">
-              <label className="block text-white font-medium mb-2">
-                What's on your mind?
-              </label>
-              <textarea
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-orange-500 focus:outline-none resize-none"
-                rows="4"
-                placeholder="Share your thoughts with the community..."
-              />
-            </div>
-            <div className="flex space-x-3">
-              <button
-                type="submit"
-                disabled={!newPost.trim()}
-                className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium"
-              >
-                Post
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowCreatePost(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Posts List */}
       {posts.length === 0 ? (
-        <div className="bg-gray-800/50 border-2 border-dashed border-gray-600 rounded-xl p-8 text-center">
-          <div className="text-gray-400 text-xl mb-4">📝 No Posts Yet</div>
-          <p className="text-gray-500 mb-4">Be the first to share something with the community!</p>
-          <button
-            onClick={() => setShowCreatePost(true)}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg"
-          >
-            Create First Post
-          </button>
+        <div className="text-center py-8">
+          <p className="text-gray-400 mb-4">No posts found.</p>
+          <p className="text-gray-500 text-sm">
+            Be the first to share something with the community!
+          </p>
         </div>
       ) : (
-        <div className="space-y-6">
-          {posts.map((post) => (
-            <div key={post._id} className="bg-gray-800 rounded-xl p-6">
-              {/* Post Header */}
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {post.author?.name?.charAt(0) || post.author?.firstName?.charAt(0) || 'U'}
+        <div className="space-y-4">
+          {posts.map(post => (
+            <div key={post._id} className="border-b border-gray-700 pb-4 last:border-b-0">
+              {/* Author Info */}
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-semibold text-sm">
+                    {post.author?.avatar || post.author?.name?.charAt(0) || 'U'}
+                  </span>
                 </div>
-                <div>
-                  <div className="text-white font-medium">
-                    {post.author?.name || `${post.author?.firstName || ''} ${post.author?.lastName || ''}`.trim() || 'Anonymous'}
-                  </div>
-                  <div className="text-gray-400 text-sm">
-                    {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Recently'}
-                  </div>
+                <div className="flex-1">
+                  <p className="font-medium text-white">
+                    {post.author?.name || 'Unknown User'}
+                    {post.author?.verified && (
+                      <span className="ml-1 text-blue-500">✓</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
+                {post.type && (
+                  <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                    {post.type}
+                  </span>
+                )}
               </div>
 
               {/* Post Content */}
-              <div className="text-gray-300 mb-4">
-                {post.content}
+              <div className="mb-3">
+                <p className="text-gray-300 leading-relaxed">
+                  {post.content}
+                </p>
+                
+                {/* Hashtags */}
+                {post.hashtags && post.hashtags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {post.hashtags.map(tag => (
+                      <span key={tag} className="text-orange-500 text-sm">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Post Actions */}
-              <div className="flex items-center space-x-6 text-gray-400">
-                <button
-                  onClick={() => handleLikePost(post._id)}
-                  className="flex items-center space-x-2 hover:text-orange-400 transition-colors"
+              <div className="flex items-center space-x-4 text-sm">
+                <button 
+                  onClick={() => handleLike(post._id)}
+                  className={`flex items-center space-x-1 transition-colors ${
+                    post.isLiked 
+                      ? 'text-red-500 hover:text-red-400' 
+                      : 'text-gray-400 hover:text-red-500'
+                  }`}
                 >
-                  <span>👍</span>
-                  <span>{post.likeCount || 0} Likes</span>
+                  <span>{post.isLiked ? '❤️' : '🤍'}</span>
+                  <span>{post.likeCount || 0}</span>
                 </button>
-                <button className="flex items-center space-x-2 hover:text-blue-400 transition-colors">
+                
+                <button className="flex items-center space-x-1 text-gray-400 hover:text-blue-500 transition-colors">
                   <span>💬</span>
-                  <span>{post.commentCount || 0} Comments</span>
+                  <span>{post.commentCount || 0}</span>
                 </button>
-                <button className="flex items-center space-x-2 hover:text-green-400 transition-colors">
+                
+                <button className="flex items-center space-x-1 text-gray-400 hover:text-green-500 transition-colors">
                   <span>📤</span>
                   <span>Share</span>
                 </button>
